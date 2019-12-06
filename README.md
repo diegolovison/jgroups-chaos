@@ -31,6 +31,24 @@ Simulate those events with mainstream Chaos Frameworks is hard because I would l
 * Spawn process allow us to simulate GC stop-the-world events while the slave still able to communicate with master
 * Be compatible with any project that has directly dependency of JGroups
 
+# Example #
+```java
+   @Test
+   void testClusterFormation() {
+      Cluster cluster = clusterExtension.getCluster();
+
+      // Given: two nodes
+      int clusterSize = 2;
+      cluster.createNodes(clusterSize, false);
+
+      // When: the nodes join the cluster
+      cluster.form();
+
+      // Then: cluster have 2 node
+      assertEquals(clusterSize, cluster.size());
+   }
+```
+
 # TODO #
 * When JGroups have a commit, execute a build and run the tests.
 
