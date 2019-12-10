@@ -1,14 +1,22 @@
 package com.github.diegolovison.jgroups;
 
+import static com.github.diegolovison.jgroups.Sleep.sleep;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jgroups.JChannel;
 
+import com.github.diegolovison.jgroups.failure.Failure;
+import com.github.diegolovison.jgroups.failure.FailureProvider;
+
 public class Cluster {
 
+   private static final AtomicInteger nodeCounter = new AtomicInteger();
    private List<Node> nodes;
 
    public Cluster() {
@@ -24,8 +32,8 @@ public class Cluster {
       }
    }
 
-   public void disconnect(Node node) {
-      node.disconnect();
+   public void close(Node node) {
+      node.close();
    }
 
    public void createNodes(int numberOfNodes) {
@@ -44,7 +52,7 @@ public class Cluster {
             throw new IllegalStateException(e);
          }
          NodeConfig nodeConfig = new NodeConfig(channel, clusterName);
-         this.nodes.add(new Node(nodeConfig));
+         this.nodes.add(new Node(nodeCounter.getAndIncrement(), nodeConfig));
       }
       if (this.nodes.size() == 0) {
          throw new IllegalStateException("numberOfNodes must be greater than 0");
@@ -73,7 +81,7 @@ public class Cluster {
       int size = this.nodes.size();
       if (size > 0) {
          for (int i=0; i<size; i++) {
-            Node node = this.nodes.get(0);
+            Node node = this.nodes.get(i);
             if (node.isRunning()) {
                runningNode = node;
                break;
@@ -102,11 +110,24 @@ public class Cluster {
          if (nodeBase.getMembersSize() == this.nodes.size()) {
             return;
          }
-         try {
-            Thread.sleep(100);
-         } catch (InterruptedException e) {
-            throw new IllegalStateException("Cannot sleep when trying to wait for cluster formation", e);
+         sleep(100);
+      }
+   }
+
+   public void split(Failure failure, Node[]... groups) {
+      FailureProvider provider = FailureProvider.get(failure);
+      List<Node> allNodes = new ArrayList<>();
+      for (Node[] nodes : groups) {
+         for (Node node : nodes) {
+            allNodes.add(node);
          }
       }
+      // split per group
+      for (Node[] nodes : groups) {
+         List<Node> ignored = new ArrayList<>(allNodes);
+         ignored.removeAll(Arrays.asList(nodes));
+         provider.simulateFailure(nodes, ignored);
+      }
+      provider.waitForFailure();
    }
 }
