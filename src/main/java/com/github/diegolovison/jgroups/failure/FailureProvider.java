@@ -9,7 +9,7 @@ import com.github.diegolovison.jgroups.failure.provider.NetworkPartitionDiscardF
 
 public interface FailureProvider {
 
-   void simulateFailure(Node[] nodes, List<Node> ignored);
+   void createFailure(Node[] nodes, List<Node> ignored);
 
    default Address[] addressFrom(List<Node> nodes) {
       Address[] addresses = new Address[nodes.size()];

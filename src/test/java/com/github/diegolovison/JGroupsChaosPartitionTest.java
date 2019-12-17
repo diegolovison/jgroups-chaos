@@ -28,7 +28,7 @@ public class JGroupsChaosPartitionTest {
       Node node3 = cluster.get(2);
 
       // When: there is a cluster split
-      cluster.split(Failure.NetworkPartition, new Node[]{node1, node2}, new Node[]{node3});
+      cluster.createFailure(Failure.NetworkPartition, new Node[]{node1, node2}, new Node[]{node3});
 
       // Then: cluster will be splitted
       assertTrue(new NodeOr(node1, node2).isCoordinator());

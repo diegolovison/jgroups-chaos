@@ -16,7 +16,7 @@ import com.github.diegolovison.jgroups.protocol.ProtocolAction;
 
 public class NetworkPartitionDiscardFailureProvider implements FailureProvider {
    @Override
-   public void simulateFailure(Node[] nodes, List<Node> ignored) {
+   public void createFailure(Node[] nodes, List<Node> ignored) {
       for (Node node : nodes) {
          ProtocolAction protocolAction = new ProtocolAction<DISCARD>() {
             @Override

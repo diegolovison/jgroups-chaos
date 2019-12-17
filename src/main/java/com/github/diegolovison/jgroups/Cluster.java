@@ -114,7 +114,7 @@ public class Cluster {
       }
    }
 
-   public void split(Failure failure, Node[]... groups) {
+   public void createFailure(Failure failure, Node[]... groups) {
       FailureProvider provider = FailureProvider.get(failure);
       List<Node> allNodes = new ArrayList<>();
       for (Node[] nodes : groups) {
@@ -126,7 +126,7 @@ public class Cluster {
       for (Node[] nodes : groups) {
          List<Node> ignored = new ArrayList<>(allNodes);
          ignored.removeAll(Arrays.asList(nodes));
-         provider.simulateFailure(nodes, ignored);
+         provider.createFailure(nodes, ignored);
       }
       provider.waitForFailure();
    }
