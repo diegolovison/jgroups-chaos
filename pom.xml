@@ -11,9 +11,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <javac.target>11</javac.target>
+        <log4j.configurationFile>log4j2.xml</log4j.configurationFile>
         <version.jgroups>4.1.8.Final</version.jgroups>
         <version.junit-jupiter>5.5.2</version.junit-jupiter>
         <version.infinispan>10.1.0.CR1</version.infinispan>
+        <version.log4j>2.8.1</version.log4j>
     </properties>
 
     <dependencies>
@@ -43,6 +45,18 @@
             <version>${version.junit-jupiter}</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- log -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${version.log4j}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${version.log4j}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -51,6 +65,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M4</version>
+                <configuration>
+                    <systemProperties>
+                        <log4j.configurationFile>${log4j.configurationFile}</log4j.configurationFile>
+                    </systemProperties>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

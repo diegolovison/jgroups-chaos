@@ -4,21 +4,15 @@ import static com.github.diegolovison.jgroups.Sleep.sleep;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.jgroups.JChannel;
 
 import com.github.diegolovison.jgroups.failure.Failure;
 import com.github.diegolovison.jgroups.failure.FailureProvider;
 
-public class Cluster {
+public abstract class Cluster<N extends Node> {
 
-   private static final AtomicInteger nodeCounter = new AtomicInteger();
-   protected List<Node> nodes;
+   protected List<N> nodes;
 
    public Cluster() {
       this.nodes = new ArrayList<>(2);
@@ -37,33 +31,6 @@ public class Cluster {
       node.close();
    }
 
-   public List<Node> createNodes(int numberOfNodes) {
-      return createNodes(numberOfNodes, true);
-   }
-
-   public List<Node> createNodes(int numberOfNodes, boolean connect) {
-      if (numberOfNodes <= 0) {
-         throw new IllegalStateException("numberOfNodes must be greater than 0");
-      }
-      String clusterName = UUID.randomUUID().toString();
-      for (int i=0; i<numberOfNodes; i++) {
-         JChannel channel = createJChannel();
-         try {
-            if (connect) {
-               channel.connect(clusterName);
-            }
-         } catch (Exception e) {
-            throw new IllegalStateException(e);
-         }
-         NodeConfig nodeConfig = new NodeConfig(channel, clusterName);
-         this.nodes.add(new Node(nodeCounter.getAndIncrement(), nodeConfig));
-      }
-      if (connect) {
-         waitForClusterToForm(this.getRunningNode());
-      }
-      return Collections.unmodifiableList(this.nodes);
-   }
-
    public void form() {
       int size = this.nodes.size();
       for (int i=0; i<size; i++) {
@@ -72,8 +39,17 @@ public class Cluster {
       waitForClusterToForm(this.getRunningNode());
    }
 
-   // ====== PRIVATE
-   private Node getRunningNode() {
+   protected void waitForClusterToForm(Node nodeBase) {
+      long failTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
+      while (System.currentTimeMillis() < failTime) {
+         if (nodeBase.getMembersSize() == this.nodes.size()) {
+            return;
+         }
+         sleep(100);
+      }
+   }
+
+   protected Node getRunningNode() {
       Node runningNode = null;
       int size = this.nodes.size();
       if (size > 0) {
@@ -91,26 +67,6 @@ public class Cluster {
       return runningNode;
    }
 
-   private JChannel createJChannel() {
-      JChannel jChannel;
-      try {
-         jChannel = new JChannel();
-      } catch (Exception e) {
-         throw new IllegalStateException(e);
-      }
-      return jChannel;
-   }
-
-   private void waitForClusterToForm(Node nodeBase) {
-      long failTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
-      while (System.currentTimeMillis() < failTime) {
-         if (nodeBase.getMembersSize() == this.nodes.size()) {
-            return;
-         }
-         sleep(100);
-      }
-   }
-
    public void createFailure(Failure failure, Node[]... groups) {
       FailureProvider provider = FailureProvider.get(failure);
       List<Node> allNodes = new ArrayList<>();
@@ -126,5 +82,11 @@ public class Cluster {
          provider.createFailure(nodes, ignored);
       }
       provider.waitForFailure();
+   }
+
+   public void solveFailure(Failure failure, Node... nodes) {
+      FailureProvider provider = FailureProvider.get(failure);
+      provider.solveFailure(nodes);
+      provider.waitForFailureBeSolved();
    }
 }

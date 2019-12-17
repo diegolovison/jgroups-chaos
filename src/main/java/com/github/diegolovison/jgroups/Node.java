@@ -2,7 +2,6 @@ package com.github.diegolovison.jgroups;
 
 import org.jgroups.Address;
 import org.jgroups.JChannel;
-import org.jgroups.protocols.DISCARD;
 import org.jgroups.protocols.TP;
 import org.jgroups.stack.Protocol;
 import org.jgroups.stack.ProtocolStack;
@@ -71,6 +70,11 @@ public class Node {
       } catch (Exception e) {
          throw new IllegalStateException("Cannot insert protocol", e);
       }
+   }
+
+   public void removeProtocol(Class<? extends Protocol> protocolClass) {
+      JChannel channel = getChannel();
+      channel.getProtocolStack().removeProtocol(protocolClass);
    }
 
    @Override

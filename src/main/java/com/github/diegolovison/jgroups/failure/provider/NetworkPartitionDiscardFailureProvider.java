@@ -7,7 +7,6 @@ import java.util.List;
 import org.jgroups.JChannel;
 import org.jgroups.protocols.DISCARD;
 import org.jgroups.protocols.TP;
-import org.jgroups.stack.Protocol;
 import org.jgroups.stack.ProtocolStack;
 
 import com.github.diegolovison.jgroups.Node;
@@ -39,8 +38,21 @@ public class NetworkPartitionDiscardFailureProvider implements FailureProvider {
    }
 
    @Override
+   public void solveFailure(Node... nodes) {
+      for (Node node : nodes) {
+         node.removeProtocol(DISCARD.class);
+      }
+   }
+
+   @Override
    public void waitForFailure() {
       // TODO Find out how to detect the failure
+      sleep(60 * 1_000);
+   }
+
+   @Override
+   public void waitForFailureBeSolved() {
+      // TODO Find out how to detect that the failure was solved
       sleep(60 * 1_000);
    }
 }

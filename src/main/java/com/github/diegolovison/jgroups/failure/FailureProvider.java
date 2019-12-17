@@ -11,6 +11,8 @@ public interface FailureProvider {
 
    void createFailure(Node[] nodes, List<Node> ignored);
 
+   void solveFailure(Node... nodes);
+
    default Address[] addressFrom(List<Node> nodes) {
       Address[] addresses = new Address[nodes.size()];
       for (int i = 0; i < nodes.size(); i++) {
@@ -27,4 +29,6 @@ public interface FailureProvider {
    }
 
    void waitForFailure();
+
+   void waitForFailureBeSolved();
 }

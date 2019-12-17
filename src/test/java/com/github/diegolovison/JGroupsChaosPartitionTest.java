@@ -8,10 +8,10 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.github.diegolovison.jgroups.Cluster;
-import com.github.diegolovison.jgroups.failure.Failure;
+import com.github.diegolovison.jgroups.JGroupsCluster;
 import com.github.diegolovison.jgroups.Node;
 import com.github.diegolovison.jgroups.NodeOr;
+import com.github.diegolovison.jgroups.failure.Failure;
 import com.github.diegolovison.junit5.ClusterExtension;
 
 public class JGroupsChaosPartitionTest {
@@ -21,7 +21,7 @@ public class JGroupsChaosPartitionTest {
 
    @Test
    void testClusterPartition() {
-      Cluster cluster = clusterExtension.createCluster();
+      JGroupsCluster cluster = clusterExtension.createCluster();
 
       // Given: 3 nodes
       List<Node> nodes = cluster.createNodes(3);
@@ -29,10 +29,10 @@ public class JGroupsChaosPartitionTest {
       Node node2 = nodes.get(1);
       Node node3 = nodes.get(2);
 
-      // When: there is a cluster split
+      // When: there is a network partition
       cluster.createFailure(Failure.NetworkPartition, new Node[]{node1, node2}, new Node[]{node3});
 
-      // Then: cluster will be splitted
+      // Then: two cluster will form
       assertTrue(new NodeOr(node1, node2).isCoordinator());
       assertTrue(node3.isCoordinator());
    }

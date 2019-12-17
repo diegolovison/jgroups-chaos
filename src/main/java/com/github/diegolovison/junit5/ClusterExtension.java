@@ -4,7 +4,7 @@ import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import com.github.diegolovison.jgroups.Cluster;
+import com.github.diegolovison.jgroups.JGroupsCluster;
 
 public class ClusterExtension implements BeforeEachCallback, AfterEachCallback {
 
@@ -22,7 +22,7 @@ public class ClusterExtension implements BeforeEachCallback, AfterEachCallback {
 
    }
 
-   public Cluster createCluster() {
-      return new Cluster();
+   public JGroupsCluster createCluster() {
+      return new JGroupsCluster();
    }
 }
