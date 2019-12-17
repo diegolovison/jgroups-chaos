@@ -17,7 +17,7 @@ public class Node {
    private final int nodeIndex;
    private final NodeConfig nodeConfig;
 
-   Node(int nodeIndex, NodeConfig nodeConfig) {
+   public Node(int nodeIndex, NodeConfig nodeConfig) {
       this.nodeIndex = nodeIndex;
       this.nodeConfig = nodeConfig;
    }

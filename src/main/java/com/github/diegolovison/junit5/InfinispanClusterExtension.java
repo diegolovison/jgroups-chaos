@@ -4,12 +4,13 @@ import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+import com.github.diegolovison.infinispan.InfinispanCluster;
 import com.github.diegolovison.jgroups.Cluster;
 
-public class ClusterExtension implements BeforeEachCallback, AfterEachCallback {
+public class InfinispanClusterExtension implements BeforeEachCallback, AfterEachCallback {
 
-   public static final ClusterExtensionBuilder builder() {
-      return new ClusterExtensionBuilder();
+   public static final InfinispanClusterExtensionBuilder builder() {
+      return new InfinispanClusterExtensionBuilder();
    }
 
    @Override
@@ -22,7 +23,7 @@ public class ClusterExtension implements BeforeEachCallback, AfterEachCallback {
 
    }
 
-   public Cluster createCluster() {
-      return new Cluster();
+   public InfinispanCluster createCluster() {
+      return new InfinispanCluster();
    }
 }

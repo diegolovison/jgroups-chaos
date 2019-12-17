@@ -4,6 +4,7 @@ import static com.github.diegolovison.jgroups.Sleep.sleep;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +18,7 @@ import com.github.diegolovison.jgroups.failure.FailureProvider;
 public class Cluster {
 
    private static final AtomicInteger nodeCounter = new AtomicInteger();
-   private List<Node> nodes;
+   protected List<Node> nodes;
 
    public Cluster() {
       this.nodes = new ArrayList<>(2);
@@ -36,11 +37,14 @@ public class Cluster {
       node.close();
    }
 
-   public void createNodes(int numberOfNodes) {
-      createNodes(numberOfNodes, true);
+   public List<Node> createNodes(int numberOfNodes) {
+      return createNodes(numberOfNodes, true);
    }
 
-   public void createNodes(int numberOfNodes, boolean connect) {
+   public List<Node> createNodes(int numberOfNodes, boolean connect) {
+      if (numberOfNodes <= 0) {
+         throw new IllegalStateException("numberOfNodes must be greater than 0");
+      }
       String clusterName = UUID.randomUUID().toString();
       for (int i=0; i<numberOfNodes; i++) {
          JChannel channel = createJChannel();
@@ -54,17 +58,10 @@ public class Cluster {
          NodeConfig nodeConfig = new NodeConfig(channel, clusterName);
          this.nodes.add(new Node(nodeCounter.getAndIncrement(), nodeConfig));
       }
-      if (this.nodes.size() == 0) {
-         throw new IllegalStateException("numberOfNodes must be greater than 0");
-      }
-
       if (connect) {
          waitForClusterToForm(this.getRunningNode());
       }
-   }
-
-   public Node get(int index) {
-      return this.nodes.get(index);
+      return Collections.unmodifiableList(this.nodes);
    }
 
    public void form() {

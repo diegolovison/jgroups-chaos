@@ -2,7 +2,7 @@ package com.github.diegolovison.jgroups;
 
 import org.jgroups.JChannel;
 
-class NodeConfig {
+public class NodeConfig {
 
    private final JChannel channel;
    private final String clusterName;
