@@ -13,9 +13,17 @@
         <javac.target>11</javac.target>
         <version.jgroups>4.1.8.Final</version.jgroups>
         <version.junit-jupiter>5.5.2</version.junit-jupiter>
+        <version.infinispan>10.1.0.CR1</version.infinispan>
     </properties>
 
     <dependencies>
+        <!-- Infinispan -->
+        <dependency>
+            <groupId>org.infinispan</groupId>
+            <artifactId>infinispan-core</artifactId>
+            <version>${version.infinispan}</version>
+        </dependency>
+
         <!-- JGroups -->
         <dependency>
             <groupId>org.jgroups</groupId>
