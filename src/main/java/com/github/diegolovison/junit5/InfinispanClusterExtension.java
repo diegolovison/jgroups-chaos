@@ -5,7 +5,6 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import com.github.diegolovison.infinispan.InfinispanCluster;
-import com.github.diegolovison.jgroups.Cluster;
 
 public class InfinispanClusterExtension implements BeforeEachCallback, AfterEachCallback {
 

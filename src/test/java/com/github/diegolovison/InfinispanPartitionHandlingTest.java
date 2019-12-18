@@ -32,25 +32,27 @@ public class InfinispanPartitionHandlingTest {
       InfinispanCluster cluster = clusterExtension.createCluster();
 
       // Given: 3 nodes
+      final String cacheName = "fooCache";
+      final int numberOfNodes = 3;
       List<InfinispanNode> nodes = cluster.createNodes(() -> {
          GlobalConfigurationBuilder globalConfigurationBuilder = GlobalConfigurationBuilder.defaultClusteredBuilder();
          globalConfigurationBuilder.transport();
          return globalConfigurationBuilder;
       }, () -> {
-         InfinispanCluster.CacheConfigurationBuilder cacheConfigurationBuilder = new InfinispanCluster.CacheConfigurationBuilder("fooCache");
+         InfinispanCluster.CacheConfigurationBuilder cacheConfigurationBuilder = new InfinispanCluster.CacheConfigurationBuilder(cacheName);
          cacheConfigurationBuilder.clustering().cacheMode(CacheMode.REPL_SYNC)
             .partitionHandling().mergePolicy(MergePolicy.REMOVE_ALL);
 
          return cacheConfigurationBuilder;
-      }, 3);
+      }, numberOfNodes);
       InfinispanNode node1 = nodes.get(0);
       InfinispanNode node2 = nodes.get(1);
       InfinispanNode node3 = nodes.get(2);
 
       // And: 3 caches
-      Cache cache1 = node1.getCache();
-      Cache cache2 = node2.getCache();
-      Cache cache3 = node3.getCache();
+      Cache cache1 = node1.getCache(cacheName);
+      Cache cache2 = node2.getCache(cacheName);
+      Cache cache3 = node3.getCache(cacheName);
 
       // When: data is added to the cache
       cache1.put("foo", "bar");
@@ -72,7 +74,8 @@ public class InfinispanPartitionHandlingTest {
       cluster.solveFailure(Failure.NetworkPartition, node1, node2, node3);
 
       // Then: there will be only one cluster
-      assertEquals(nodes.size(), cluster.size());
+      assertEquals(numberOfNodes, nodes.size());
+      assertEquals(numberOfNodes, cluster.size());
 
       // And: conflict manager was done
       waitTheConflictManager(cache1, cache2, cache3);

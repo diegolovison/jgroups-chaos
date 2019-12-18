@@ -1,12 +1,22 @@
 package com.github.diegolovison.jgroups;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import org.jgroups.JChannel;
+import com.github.diegolovison.os.ChaosProcessFactory;
+import com.github.diegolovison.os.ChaosProcessFramework;
 
 public class JGroupsCluster extends Cluster<Node> {
+
+   private final List<JGroupsChaosProcess> chaosProcesses;
+   private final String clusterName;
+
+   public JGroupsCluster() {
+      this.chaosProcesses = new ArrayList<>();
+      this.clusterName = UUID.randomUUID().toString();
+   }
 
    public List<Node> createNodes(int numberOfNodes) {
       return createNodes(numberOfNodes, true);
@@ -16,32 +26,37 @@ public class JGroupsCluster extends Cluster<Node> {
       if (numberOfNodes <= 0) {
          throw new IllegalStateException("numberOfNodes must be greater than 0");
       }
-      String clusterName = UUID.randomUUID().toString();
       for (int i=0; i<numberOfNodes; i++) {
-         JChannel channel = createJChannel();
-         try {
-            if (connect) {
-               channel.connect(clusterName);
-            }
-         } catch (Exception e) {
-            throw new IllegalStateException(e);
-         }
-         NodeConfig nodeConfig = new NodeConfig(channel, clusterName);
-         this.nodes.add(new Node(i, nodeConfig));
+         JGroupsChaosProcess chaosProcess = (JGroupsChaosProcess) ChaosProcessFactory.createInstance(ChaosProcessFramework.JGROUPS)
+               .run(new JGroupsChaosConfig(this.clusterName, connect));
+         this.chaosProcesses.add(chaosProcess);
+         this.nodes.add(new Node(chaosProcess));
       }
       if (connect) {
-         waitForClusterToForm(this.getRunningNode());
+         form(numberOfNodes);
       }
       return Collections.unmodifiableList(this.nodes);
    }
 
-   private JChannel createJChannel() {
-      JChannel jChannel;
-      try {
-         jChannel = new JChannel();
-      } catch (Exception e) {
-         throw new IllegalStateException(e);
+   public void form(int numberOfNodes) {
+      for (JGroupsChaosProcess jGroupsChaosProcess : this.chaosProcesses) {
+         jGroupsChaosProcess.waitForClusterToForm(numberOfNodes);
       }
-      return jChannel;
+   }
+
+   public void disconnect(Node node) {
+      node.disconnect();
+   }
+
+   @Override
+   public int size() {
+      int size = 0;
+      for (JGroupsChaosProcess jGroupsChaosProcess : this.chaosProcesses) {
+         if (jGroupsChaosProcess.isRunning() && jGroupsChaosProcess.getClusterName().equals(this.clusterName)) {
+            size = jGroupsChaosProcess.getNumberOfMembers();
+            break;
+         }
+      }
+      return size;
    }
 }

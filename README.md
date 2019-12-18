@@ -30,6 +30,7 @@ Simulate those events with mainstream Chaos Frameworks is hard because I would l
 * Act as a master/slave and spawn process to another JVM
 * Spawn process allow us to simulate GC stop-the-world events while the slave still able to communicate with master
 * Be compatible with any project that has directly dependency of JGroups
+* Support multiple JGroups version when running `-Djgroups-chaos.ChaosProcessType=SPAWN`
 
 # Example #
 ```java

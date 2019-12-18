@@ -1,6 +1,6 @@
 package com.github.diegolovison;
 
-import static com.github.diegolovison.junit5.ClusterExtension.builder;
+import static com.github.diegolovison.junit5.JGroupsClusterExtension.builder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
@@ -10,29 +10,31 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.github.diegolovison.jgroups.JGroupsCluster;
 import com.github.diegolovison.jgroups.Node;
-import com.github.diegolovison.junit5.ClusterExtension;
+import com.github.diegolovison.junit5.JGroupsClusterExtension;
 
 public class JGroupsChaosClusterTest {
 
    @RegisterExtension
-   ClusterExtension clusterExtension = builder().build();
+   JGroupsClusterExtension clusterExtension = builder().build();
 
    @Test
    void testClusterFormation() {
       JGroupsCluster cluster = clusterExtension.createCluster();
 
       // Given: two nodes
-      List<Node> nodes = cluster.createNodes(2, false);
+      int numberOfNodes = 2;
+      List<Node> nodes = cluster.createNodes(numberOfNodes, false);
 
       // When: the nodes join the cluster
-      cluster.form();
+      cluster.form(numberOfNodes);
 
-      // Then: cluster have 2 node
-      assertEquals(nodes.size(), cluster.size());
+      // Then: cluster have 2 nodes
+      assertEquals(numberOfNodes, cluster.size());
+      assertEquals(numberOfNodes, nodes.size());
    }
 
    @Test
-   void testClusterNodeClose() {
+   void testClusterNodeDisconnect() {
       JGroupsCluster cluster = clusterExtension.createCluster();
 
       // Given: two nodes
@@ -43,7 +45,7 @@ public class JGroupsChaosClusterTest {
       assertEquals(2, cluster.size());
 
       // When: one node leave the cluster
-      cluster.close(node1);
+      cluster.disconnect(node1);
 
       // Then: cluster have 1 node
       assertEquals(1, cluster.size());

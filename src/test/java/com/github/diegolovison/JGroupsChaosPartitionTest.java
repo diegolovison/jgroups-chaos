@@ -1,6 +1,6 @@
 package com.github.diegolovison;
 
-import static com.github.diegolovison.junit5.ClusterExtension.builder;
+import static com.github.diegolovison.junit5.JGroupsClusterExtension.builder;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -12,12 +12,12 @@ import com.github.diegolovison.jgroups.JGroupsCluster;
 import com.github.diegolovison.jgroups.Node;
 import com.github.diegolovison.jgroups.NodeOr;
 import com.github.diegolovison.jgroups.failure.Failure;
-import com.github.diegolovison.junit5.ClusterExtension;
+import com.github.diegolovison.junit5.JGroupsClusterExtension;
 
 public class JGroupsChaosPartitionTest {
 
    @RegisterExtension
-   ClusterExtension clusterExtension = builder().build();
+   JGroupsClusterExtension clusterExtension = builder().build();
 
    @Test
    void testClusterPartition() {

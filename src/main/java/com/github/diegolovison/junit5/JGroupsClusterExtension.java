@@ -6,10 +6,10 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import com.github.diegolovison.jgroups.JGroupsCluster;
 
-public class ClusterExtension implements BeforeEachCallback, AfterEachCallback {
+public class JGroupsClusterExtension implements BeforeEachCallback, AfterEachCallback {
 
-   public static final ClusterExtensionBuilder builder() {
-      return new ClusterExtensionBuilder();
+   public static final JGroupsClusterExtensionBuilder builder() {
+      return new JGroupsClusterExtensionBuilder();
    }
 
    @Override

@@ -3,18 +3,17 @@ package com.github.diegolovison.infinispan;
 import org.infinispan.Cache;
 
 import com.github.diegolovison.jgroups.Node;
-import com.github.diegolovison.jgroups.NodeConfig;
 
 public class InfinispanNode extends Node {
 
-   private final Cache cache;
+   private InfinispanChaosProcess infinispanChaosProcess;
 
-   public InfinispanNode(int nodeIndex, NodeConfig nodeConfig, Cache cache) {
-      super(nodeIndex, nodeConfig);
-      this.cache = cache;
+   public InfinispanNode(InfinispanChaosProcess infinispanChaosProcess) {
+      super(infinispanChaosProcess);
+      this.infinispanChaosProcess = infinispanChaosProcess;
    }
 
-   public Cache getCache() {
-      return cache;
+   public Cache getCache(String cacheName) {
+      return this.infinispanChaosProcess.getCache(cacheName);
    }
 }
