@@ -43,6 +43,11 @@ public class JGroupsChaosProcessSameVM extends JGroupsChaosProcess<JGroupsChaosC
    }
 
    @Override
+   public boolean isRunning() {
+      return this.channel.isConnected();
+   }
+
+   @Override
    public boolean isCoordinator() {
       return this.channel.getView().getMembers().get(0).equals(getAddress());
    }
@@ -71,7 +76,6 @@ public class JGroupsChaosProcessSameVM extends JGroupsChaosProcess<JGroupsChaosC
    @Override
    public void disconnect() {
       this.channel.disconnect();
-      this.setStatus(ChaosProcessStatus.STOPPED);
    }
 
    @Override
@@ -106,9 +110,6 @@ public class JGroupsChaosProcessSameVM extends JGroupsChaosProcess<JGroupsChaosC
    private void connect() {
       try {
          this.channel.connect(chaosConfig.getClusterName());
-         if (this.channel.isConnected()) {
-            this.setStatus(ChaosProcessStatus.RUNNING);
-         }
       } catch (Exception e) {
          throw new IllegalStateException(e);
       }

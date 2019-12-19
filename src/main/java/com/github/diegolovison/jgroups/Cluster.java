@@ -38,5 +38,11 @@ public abstract class Cluster<N extends Node> {
       provider.waitForFailureBeSolved();
    }
 
+   public void disconnectAll() {
+      for (Node node : nodes) {
+         node.disconnect();
+      }
+   }
+
    public abstract int size();
 }

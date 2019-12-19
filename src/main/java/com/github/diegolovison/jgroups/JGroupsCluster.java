@@ -7,15 +7,22 @@ import java.util.UUID;
 
 import com.github.diegolovison.os.ChaosProcessFactory;
 import com.github.diegolovison.os.ChaosProcessFramework;
+import com.github.diegolovison.os.ChaosProcessType;
 
 public class JGroupsCluster extends Cluster<Node> {
 
    private final List<JGroupsChaosProcess> chaosProcesses;
    private final String clusterName;
+   private final ChaosProcessType processType;
 
    public JGroupsCluster() {
+      this(UUID.randomUUID().toString(), ChaosProcessType.SAME_VM);
+   }
+
+   public JGroupsCluster(String clusterName, ChaosProcessType processType) {
       this.chaosProcesses = new ArrayList<>();
-      this.clusterName = UUID.randomUUID().toString();
+      this.clusterName = clusterName;
+      this.processType = processType;
    }
 
    public List<Node> createNodes(int numberOfNodes) {
@@ -27,7 +34,7 @@ public class JGroupsCluster extends Cluster<Node> {
          throw new IllegalStateException("numberOfNodes must be greater than 0");
       }
       for (int i=0; i<numberOfNodes; i++) {
-         JGroupsChaosProcess chaosProcess = (JGroupsChaosProcess) ChaosProcessFactory.createInstance(ChaosProcessFramework.JGROUPS)
+         JGroupsChaosProcess chaosProcess = (JGroupsChaosProcess) ChaosProcessFactory.createInstance(ChaosProcessFramework.JGROUPS, this.processType)
                .run(new JGroupsChaosConfig(this.clusterName, connect));
          this.chaosProcesses.add(chaosProcess);
          this.nodes.add(new Node(chaosProcess));

@@ -23,7 +23,6 @@ public class InfinispanEmbeddedChaosProcessSameVM extends InfinispanChaosProcess
    @Override
    public InfinispanEmbeddedChaosProcessSameVM run(Supplier<GlobalConfigurationBuilder> globalConfigurationBuilderSupplier) {
       this.cacheManager = new DefaultCacheManager(globalConfigurationBuilderSupplier.get().build());
-      this.setStatus(ChaosProcessStatus.RUNNING);
       return this;
    }
 
@@ -35,6 +34,11 @@ public class InfinispanEmbeddedChaosProcessSameVM extends InfinispanChaosProcess
    @Override
    public String getClusterName() {
       return this.cacheManager.getClusterName();
+   }
+
+   @Override
+   public boolean isRunning() {
+      return getJChannel().isConnected();
    }
 
    @Override
@@ -65,8 +69,7 @@ public class InfinispanEmbeddedChaosProcessSameVM extends InfinispanChaosProcess
 
    @Override
    public void disconnect() {
-      this.cacheManager.getTransport().stop();
-      this.setStatus(ChaosProcessStatus.STOPPED);
+      this.cacheManager.stop();
    }
 
    @Override

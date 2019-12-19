@@ -21,7 +21,7 @@ public class JGroupsChaosPartitionTest {
 
    @Test
    void testClusterPartition() {
-      JGroupsCluster cluster = clusterExtension.createCluster();
+      JGroupsCluster cluster = clusterExtension.jGroupsCluster();
 
       // Given: 3 nodes
       List<Node> nodes = cluster.createNodes(3);

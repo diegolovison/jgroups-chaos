@@ -29,7 +29,7 @@ public class InfinispanPartitionHandlingTest {
 
    @Test
    void testMergePolicyRemoveAll() {
-      InfinispanCluster cluster = clusterExtension.createCluster();
+      InfinispanCluster cluster = clusterExtension.infinispanCluster();
 
       // Given: 3 nodes
       final String cacheName = "fooCache";

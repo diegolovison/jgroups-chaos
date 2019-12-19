@@ -19,7 +19,7 @@ public class JGroupsChaosClusterTest {
 
    @Test
    void testClusterFormation() {
-      JGroupsCluster cluster = clusterExtension.createCluster();
+      JGroupsCluster cluster = clusterExtension.jGroupsCluster();
 
       // Given: two nodes
       int numberOfNodes = 2;
@@ -35,7 +35,7 @@ public class JGroupsChaosClusterTest {
 
    @Test
    void testClusterNodeDisconnect() {
-      JGroupsCluster cluster = clusterExtension.createCluster();
+      JGroupsCluster cluster = clusterExtension.jGroupsCluster();
 
       // Given: two nodes
       List<Node> nodes = cluster.createNodes(2);
