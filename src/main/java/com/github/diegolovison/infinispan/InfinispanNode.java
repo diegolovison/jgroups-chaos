@@ -1,7 +1,6 @@
 package com.github.diegolovison.infinispan;
 
-import org.infinispan.Cache;
-
+import com.github.diegolovison.infinispan.cache.ChaosCache;
 import com.github.diegolovison.jgroups.Node;
 
 public class InfinispanNode extends Node {
@@ -13,7 +12,7 @@ public class InfinispanNode extends Node {
       this.infinispanChaosProcess = infinispanChaosProcess;
    }
 
-   public Cache getCache(String cacheName) {
+   public ChaosCache getCache(String cacheName) {
       return this.infinispanChaosProcess.getCache(cacheName);
    }
 }

@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.Socket;
 
-import org.jgroups.protocols.TP;
 import org.jgroups.stack.Protocol;
-import org.jgroups.stack.ProtocolStack;
+import org.jgroups.util.UUID;
 
-import com.github.diegolovison.jgroups.protocol.ProtocolAction;
+import com.github.diegolovison.base.ChaosConfig;
+import com.github.diegolovison.os.Response;
+import com.github.diegolovison.os.SocketClientHandler;
 import com.github.diegolovison.os.SocketServer;
 
 public class JGroupsChaosProcessSpawnServer extends SocketServer {
@@ -20,46 +22,8 @@ public class JGroupsChaosProcessSpawnServer extends SocketServer {
 
    private JGroupsChaosProcessSameVM vm;
 
-   @Override
-   protected boolean onMessage(String message) {
-      boolean _super = super.onMessage(message);
-      if (!_super) {
-         String method = getMethod(message);
-         String[] args = getArguments(message);
-         String response = null;
-         if ("getNumberOfMembers".equals(method)) {
-            response = getNumberOfMembers(args);
-            _super = true;
-         } else if ("getClusterName".equals(method)) {
-            response = getClusterName(args);
-            _super = true;
-         } else if ("isCoordinator".equals(method)) {
-            response = isCoordinator(args);
-            _super = true;
-         } else if ("insertProtocol".equals(method)) {
-            response = insertProtocol(args);
-            _super = true;
-         } else if ("removeProtocol".equals(method)) {
-            response = removeProtocol(args);
-            _super = true;
-         } else if ("disconnect".equals(method)) {
-            response = disconnect(args);
-            _super = true;
-         } else if ("getAddress".equals(method)) {
-            response = getAddress(args);
-            _super = true;
-         } else if ("waitForClusterToForm".equals(method)) {
-            response = waitForClusterToForm(args);
-            _super = true;
-         } else if ("isRunning".equals(method)) {
-            response = isRunning(args);
-            _super = true;
-         }
-         if (_super) {
-            out.println(response);
-         }
-      }
-      return _super;
+   public JGroupsChaosProcessSpawnServer() {
+      this.vm = new JGroupsChaosProcessSameVM();
    }
 
    @Override
@@ -67,43 +31,69 @@ public class JGroupsChaosProcessSpawnServer extends SocketServer {
       File configFile = new File(args[1]);
       JGroupsChaosConfig config;
       try (FileInputStream inputStream = new FileInputStream(configFile)) {
-         config = JGroupsChaosConfig.JGroupsChaosConfigMarshaller.fromStream(inputStream);
-
+         config = ChaosConfig.ChaosConfigMarshaller.fromStream(inputStream);
       } catch (FileNotFoundException e) {
          throw new IllegalStateException(e);
       } catch (IOException e) {
          throw new IllegalStateException(e);
       }
-      vm = new JGroupsChaosProcessSameVM();
-      vm.run(config);
+      this.vm.run(config);
    }
 
    @Override
-   protected void onStop() {
-      vm.disconnect();
+   protected SocketClientHandler createSocketClientHandler(Socket s) throws IOException {
+      return new SocketClientHandler(s) {
+         @Override
+         protected Response doRequest(String method, String[] args) {
+            Response response = super.doRequest(method, args);
+            if (Response.EMPTY_RESPONSE.equals(response)) {
+               if ("getNumberOfMembers".equals(method)) {
+                  return new Response(getNumberOfMembers(args));
+               } else if ("getClusterName".equals(method)) {
+                  return new Response(getClusterName(args));
+               } else if ("isCoordinator".equals(method)) {
+                  return new Response(isCoordinator(args));
+               } else if ("insertProtocol".equals(method)) {
+                  return new Response(insertProtocol(args));
+               } else if ("removeProtocol".equals(method)) {
+                  return new Response(removeProtocol(args));
+               } else if ("disconnect".equals(method)) {
+                  return new Response(disconnect(args));
+               } else if ("getAddress".equals(method)) {
+                  return new Response(getAddress(args));
+               } else if ("waitForClusterToForm".equals(method)) {
+                  return new Response(waitForClusterToForm(args));
+               } else if ("isRunning".equals(method)) {
+                  return new Response(isRunning(args));
+               }
+            }
+            return response;
+         }
+      };
    }
 
    private String waitForClusterToForm(String[] args) {
-      vm.waitForClusterToForm(Integer.valueOf(args[0]));
+      this.vm.waitForClusterToForm(Integer.valueOf(args[0]));
       return null;
    }
 
    private String getAddress(String[] args) {
-      return vm.getAddress().toString();
+      return ((UUID)vm.getAddress()).toStringLong();
    }
 
    private String disconnect(String[] args) {
-      vm.disconnect();
+      this.vm.disconnect();
+      this.stop();
       return null;
    }
 
    private String isRunning(String[] args) {
-      return String.valueOf(vm.isRunning());
+      return String.valueOf(this.vm.isRunning());
    }
 
    private String removeProtocol(String[] args) {
       try {
-         vm.removeProtocol((Class<? extends Protocol>) Class.forName(args[0]));
+         this.vm.removeProtocol((Class<? extends Protocol>) Class.forName(args[0]));
       } catch (ClassNotFoundException e) {
          throw new IllegalStateException(e);
       }
@@ -111,23 +101,19 @@ public class JGroupsChaosProcessSpawnServer extends SocketServer {
    }
 
    private String insertProtocol(String[] args) {
-      ProtocolAction action = null;
-      ProtocolStack.Position position = null;
-      Class<TP> clazz = null;
-      vm.insertProtocol(action, position, clazz);
-      return null;
+      return ProcessSpawn.insertProtocol(this.vm, args);
    }
 
    private String isCoordinator(String[] args) {
-      return String.valueOf(vm.isCoordinator());
+      return String.valueOf(this.vm.isCoordinator());
    }
 
    private String getClusterName(String[] args) {
-      return vm.getClusterName();
+      return this.vm.getClusterName();
    }
 
    private String getNumberOfMembers(String[] args) {
-      return String.valueOf(vm.getNumberOfMembers());
+      return String.valueOf(this.vm.getNumberOfMembers());
    }
 
 

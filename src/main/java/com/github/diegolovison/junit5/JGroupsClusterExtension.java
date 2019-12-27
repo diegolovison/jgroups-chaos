@@ -45,6 +45,7 @@ public class JGroupsClusterExtension implements AfterEachCallback {
 
       public JGroupsClusterExtensionBuilder() {
          this.clusterName = UUID.randomUUID().toString();
+         this.processType = ChaosProcessType.SAME_VM;
       }
 
       public JGroupsClusterExtensionBuilder clusterName(String clusterName) {

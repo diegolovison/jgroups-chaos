@@ -1,19 +1,13 @@
 package com.github.diegolovison.jgroups;
 
-import static com.github.diegolovison.jgroups.Sleep.sleep;
-
-import java.util.concurrent.TimeUnit;
-
 import org.jgroups.Address;
 import org.jgroups.JChannel;
-import org.jgroups.protocols.TP;
 import org.jgroups.stack.Protocol;
-import org.jgroups.stack.ProtocolStack;
 
-import com.github.diegolovison.jgroups.protocol.ProtocolAction;
 import com.github.diegolovison.os.ChaosProcess;
+import com.github.diegolovison.os.Eventually;
 
-public class JGroupsChaosProcessSameVM extends JGroupsChaosProcess<JGroupsChaosConfig> {
+public class JGroupsChaosProcessSameVM extends JGroupsChaosProcess {
 
    private JChannel channel;
    private JGroupsChaosConfig chaosConfig;
@@ -53,22 +47,6 @@ public class JGroupsChaosProcessSameVM extends JGroupsChaosProcess<JGroupsChaosC
    }
 
    @Override
-   public void insertProtocol(ProtocolAction protocolAction, ProtocolStack.Position above, Class<TP> tpClass) {
-      try {
-         Protocol protocol = protocolAction.find(this.channel);
-         if (protocol == null) {
-            protocol = protocolAction.create();
-         }
-         if (protocolAction.shouldOverwriteSet()) {
-            protocolAction.set(protocol);
-         }
-         this.channel.getProtocolStack().insertProtocol(protocol, above, tpClass);
-      } catch (Exception e) {
-         throw new IllegalStateException("Cannot insert protocol", e);
-      }
-   }
-
-   @Override
    public void removeProtocol(Class<? extends Protocol> protocolClass) {
       this.channel.getProtocolStack().removeProtocol(protocolClass);
    }
@@ -83,6 +61,11 @@ public class JGroupsChaosProcessSameVM extends JGroupsChaosProcess<JGroupsChaosC
       return this.channel.getAddress();
    }
 
+   @Override
+   public JChannel getJChannel() {
+      return this.channel;
+   }
+
    private JChannel createJChannel() {
       JChannel jChannel;
       try {
@@ -95,16 +78,13 @@ public class JGroupsChaosProcessSameVM extends JGroupsChaosProcess<JGroupsChaosC
 
    @Override
    public void waitForClusterToForm(int numberOfNodes) {
-      long failTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
-      while (System.currentTimeMillis() < failTime) {
+      Eventually.run(() -> {
+         // TODO the wait shouldn't connect. it must only wait.
          if (!this.channel.isConnected()) {
             this.connect();
          }
-         if (this.channel.getView().getMembers().size() == numberOfNodes) {
-            return;
-         }
-         sleep(100);
-      }
+         return this.channel.getView().getMembers().size() == numberOfNodes;
+      });
    }
 
    private void connect() {

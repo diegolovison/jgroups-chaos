@@ -1,0 +1,15 @@
+<infinispan
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:infinispan:config:10.1 https://infinispan.org/schemas/infinispan-config-10.1.xsd"
+        xmlns="urn:infinispan:config:10.1">
+
+    <cache-container name="default" statistics="true">
+        <transport cluster="ISPN" stack="tcp"/>
+        <replicated-cache name="replicatedCache" mode="SYNC">
+        </replicated-cache>
+        <replicated-cache name="partitionHandlingCache" mode="SYNC">
+            <partition-handling merge-policy="REMOVE_ALL"/>
+        </replicated-cache>
+    </cache-container>
+
+</infinispan>

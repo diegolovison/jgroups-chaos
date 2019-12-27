@@ -4,36 +4,19 @@ import static com.github.diegolovison.jgroups.Sleep.sleep;
 
 import java.util.List;
 
-import org.jgroups.JChannel;
 import org.jgroups.protocols.DISCARD;
 import org.jgroups.protocols.TP;
 import org.jgroups.stack.ProtocolStack;
 
 import com.github.diegolovison.jgroups.Node;
 import com.github.diegolovison.jgroups.failure.FailureProvider;
-import com.github.diegolovison.jgroups.protocol.ProtocolAction;
+import com.github.diegolovison.jgroups.failure.action.DiscardAction;
 
 public class NetworkPartitionDiscardFailureProvider implements FailureProvider {
    @Override
    public void createFailure(Node[] nodes, List<Node> ignored) {
       for (Node node : nodes) {
-         ProtocolAction protocolAction = new ProtocolAction<DISCARD>() {
-            @Override
-            public DISCARD create() {
-               return new DISCARD();
-            }
-
-            @Override
-            public DISCARD find(JChannel channel) {
-               return channel.getProtocolStack().findProtocol(DISCARD.class);
-            }
-
-            @Override
-            public void set(DISCARD discard) {
-               discard.addIgnoredMembers(addressFrom(ignored));
-            }
-         };
-         node.insertProtocol(protocolAction, ProtocolStack.Position.ABOVE, TP.class);
+         node.insertProtocol(DiscardAction.class, ProtocolStack.Position.ABOVE, TP.class, addressFrom(ignored));
       }
    }
 

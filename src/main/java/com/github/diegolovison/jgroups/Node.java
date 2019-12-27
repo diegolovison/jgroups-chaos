@@ -24,8 +24,9 @@ public class Node {
       return this.chaosProcess.isCoordinator();
    }
 
-   public void insertProtocol(ProtocolAction protocolAction, ProtocolStack.Position above, Class<TP> tpClass) {
-      this.chaosProcess.insertProtocol(protocolAction, above, tpClass);
+   public void insertProtocol(Class<? extends ProtocolAction> protocolActionClass, ProtocolStack.Position above,
+                              Class<TP> tpClass, Address[] ignored) {
+      this.chaosProcess.insertProtocol(protocolActionClass, above, tpClass, ignored);
    }
 
    public void removeProtocol(Class<? extends Protocol> protocolClass) {

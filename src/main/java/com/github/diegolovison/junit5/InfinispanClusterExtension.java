@@ -14,6 +14,12 @@ public class InfinispanClusterExtension implements AfterEachCallback {
 
    private InfinispanCluster infinispanCluster;
 
+   private final ChaosProcessType processType;
+
+   public InfinispanClusterExtension(ChaosProcessType processType) {
+      this.processType = processType;
+   }
+
    @Override
    public void afterEach(ExtensionContext extensionContext) throws Exception {
       if (infinispanCluster != null) {
@@ -23,15 +29,26 @@ public class InfinispanClusterExtension implements AfterEachCallback {
 
    public InfinispanCluster infinispanCluster() {
       if (infinispanCluster == null) {
-         infinispanCluster = new InfinispanCluster("ISPN", ChaosProcessType.SAME_VM);
+         infinispanCluster = new InfinispanCluster(this.processType);
       }
       return infinispanCluster;
    }
 
    public static class InfinispanClusterExtensionBuilder {
 
+      private ChaosProcessType processType;
+
+      public InfinispanClusterExtensionBuilder() {
+         this.processType = ChaosProcessType.SAME_VM;
+      }
+
+      public InfinispanClusterExtensionBuilder processType(ChaosProcessType processType) {
+         this.processType = processType;
+         return this;
+      }
+
       public InfinispanClusterExtension build() {
-         InfinispanClusterExtension clusterExtension = new InfinispanClusterExtension();
+         InfinispanClusterExtension clusterExtension = new InfinispanClusterExtension(this.processType);
          return clusterExtension;
       }
    }

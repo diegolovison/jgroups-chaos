@@ -13,19 +13,19 @@ public interface FailureProvider {
 
    void solveFailure(Node... nodes);
 
+   static FailureProvider get(Failure failure) {
+      if (Failure.NetworkPartition.equals(failure)) {
+         return new NetworkPartitionDiscardFailureProvider();
+      }
+      throw new NullPointerException();
+   }
+
    default Address[] addressFrom(List<Node> nodes) {
       Address[] addresses = new Address[nodes.size()];
       for (int i = 0; i < nodes.size(); i++) {
          addresses[i] = nodes.get(i).getAddress();
       }
       return addresses;
-   }
-
-   static FailureProvider get(Failure failure) {
-      if (Failure.NetworkPartition.equals(failure)) {
-         return new NetworkPartitionDiscardFailureProvider();
-      }
-      throw new NullPointerException();
    }
 
    void waitForFailure();

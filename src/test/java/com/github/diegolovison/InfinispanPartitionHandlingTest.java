@@ -7,17 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.List;
 
-import org.infinispan.Cache;
-import org.infinispan.configuration.cache.CacheMode;
-import org.infinispan.configuration.global.GlobalConfigurationBuilder;
-import org.infinispan.conflict.ConflictManager;
-import org.infinispan.conflict.ConflictManagerFactory;
-import org.infinispan.conflict.MergePolicy;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.github.diegolovison.infinispan.InfinispanCluster;
 import com.github.diegolovison.infinispan.InfinispanNode;
+import com.github.diegolovison.infinispan.cache.ChaosCache;
 import com.github.diegolovison.jgroups.Node;
 import com.github.diegolovison.jgroups.failure.Failure;
 import com.github.diegolovison.junit5.InfinispanClusterExtension;
@@ -32,27 +27,17 @@ public class InfinispanPartitionHandlingTest {
       InfinispanCluster cluster = clusterExtension.infinispanCluster();
 
       // Given: 3 nodes
-      final String cacheName = "fooCache";
+      final String cacheName = "partitionHandlingCache";
       final int numberOfNodes = 3;
-      List<InfinispanNode> nodes = cluster.createNodes(() -> {
-         GlobalConfigurationBuilder globalConfigurationBuilder = GlobalConfigurationBuilder.defaultClusteredBuilder();
-         globalConfigurationBuilder.transport();
-         return globalConfigurationBuilder;
-      }, () -> {
-         InfinispanCluster.CacheConfigurationBuilder cacheConfigurationBuilder = new InfinispanCluster.CacheConfigurationBuilder(cacheName);
-         cacheConfigurationBuilder.clustering().cacheMode(CacheMode.REPL_SYNC)
-            .partitionHandling().mergePolicy(MergePolicy.REMOVE_ALL);
-
-         return cacheConfigurationBuilder;
-      }, numberOfNodes);
+      List<InfinispanNode> nodes = cluster.createNodes("ispn-config/infinispan-base-config.xml", numberOfNodes);
       InfinispanNode node1 = nodes.get(0);
       InfinispanNode node2 = nodes.get(1);
       InfinispanNode node3 = nodes.get(2);
 
       // And: 3 caches
-      Cache cache1 = node1.getCache(cacheName);
-      Cache cache2 = node2.getCache(cacheName);
-      Cache cache3 = node3.getCache(cacheName);
+      ChaosCache cache1 = node1.getCache(cacheName);
+      ChaosCache cache2 = node2.getCache(cacheName);
+      ChaosCache cache3 = node3.getCache(cacheName);
 
       // When: data is added to the cache
       cache1.put("foo", "bar");
@@ -78,7 +63,7 @@ public class InfinispanPartitionHandlingTest {
       assertEquals(numberOfNodes, cluster.size());
 
       // And: conflict manager was done
-      waitTheConflictManager(cache1, cache2, cache3);
+      waitTheConflictManager(10, cache1, cache2, cache3);
 
       // And: the merge policy will remove all data
       assertNull(cache1.get("foo"));
@@ -86,28 +71,27 @@ public class InfinispanPartitionHandlingTest {
       assertNull(cache3.get("foo"));
    }
 
-   private void waitTheConflictManager(Cache... caches) {
-      for (Cache cache : caches) {
-         ConflictManager cm = ConflictManagerFactory.get(cache.getAdvancedCache());
+   private void waitTheConflictManager(int times, ChaosCache... caches) {
+      for (ChaosCache cache : caches) {
          int countConflictResolution = 0;
-         while (cm.isConflictResolutionInProgress()) {
+         while (cache.isConflictResolutionInProgress()) {
             try {
                Thread.sleep(1000);
             } catch (InterruptedException e) {
                throw new IllegalStateException(e);
             }
-            if (countConflictResolution++ >= 10) {
+            if (countConflictResolution++ >= times) {
                throw new IllegalStateException("Do we need 10 seconds to solve conflict resolution?");
             }
          }
          int countStateTransfer = 0;
-         while (cm.isStateTransferInProgress()) {
+         while (cache.isStateTransferInProgress()) {
             try {
                Thread.sleep(1000);
             } catch (InterruptedException e) {
                throw new IllegalStateException(e);
             }
-            if (countStateTransfer++ >= 10) {
+            if (countStateTransfer++ >= times) {
                throw new IllegalStateException("Do we need 10 seconds to do the state transfer?");
             }
          }

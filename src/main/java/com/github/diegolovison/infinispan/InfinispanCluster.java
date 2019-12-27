@@ -3,10 +3,6 @@ package com.github.diegolovison.infinispan;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
-
-import org.infinispan.configuration.cache.ConfigurationBuilder;
-import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 
 import com.github.diegolovison.jgroups.Cluster;
 import com.github.diegolovison.os.ChaosProcessFactory;
@@ -16,35 +12,40 @@ import com.github.diegolovison.os.ChaosProcessType;
 public class InfinispanCluster extends Cluster<InfinispanNode> {
 
    private final List<InfinispanChaosProcess> chaosProcesses;
-   private final String clusterName;
    private final ChaosProcessType processType;
+   private String clusterName;
 
-
-   public InfinispanCluster(String clusterName, ChaosProcessType processType) {
+   public InfinispanCluster(ChaosProcessType processType) {
       this.chaosProcesses = new ArrayList<>();
-      this.clusterName = clusterName;
       this.processType = processType;
    }
 
-   public List<InfinispanNode> createNodes(Supplier<GlobalConfigurationBuilder> globalConfigurationBuilderSupplier,
-                                 Supplier<CacheConfigurationBuilder> cacheConfigurationBuilderSupplier,
-                                 int numberOfNodes) {
+   // GlobalConfigurationBuilder is not serializable. This is why we are using the config file
+   public List<InfinispanNode> createNodes(String configFile, int numberOfNodes) {
+      // maybe an argument ?
+      boolean connect = true;
       // create managers
       for (int i = 0; i < numberOfNodes; i++) {
          InfinispanChaosProcess chaosProcess = (InfinispanChaosProcess)
-               ChaosProcessFactory.createInstance(ChaosProcessFramework.INFINISPAN, this.processType).run(globalConfigurationBuilderSupplier);
+               ChaosProcessFactory.createInstance(ChaosProcessFramework.INFINISPAN, this.processType).run(new InfinispanChaosConfig(configFile));
          this.chaosProcesses.add(chaosProcess);
-      }
-
-      // create nodes
-      for (int i = 0; i < numberOfNodes; i++) {
-         InfinispanChaosProcess chaosProcess = chaosProcesses.get(i);
-         CacheConfigurationBuilder cacheConfigurationBuilder = cacheConfigurationBuilderSupplier.get();
-         chaosProcess.createCache(cacheConfigurationBuilder.cacheName, cacheConfigurationBuilder);
          this.nodes.add(new InfinispanNode(chaosProcess));
       }
 
+      if (connect) {
+         form(numberOfNodes);
+      }
+
+      // wait until the nodes be connected to retrieve the cluster name
+      this.clusterName = this.chaosProcesses.get(0).getClusterName();
+
       return Collections.unmodifiableList(this.nodes);
+   }
+
+   public void form(int numberOfNodes) {
+      for (InfinispanChaosProcess infinispanChaosProcess : this.chaosProcesses) {
+         infinispanChaosProcess.waitForClusterToForm(numberOfNodes);
+      }
    }
 
    @Override
@@ -57,13 +58,5 @@ public class InfinispanCluster extends Cluster<InfinispanNode> {
          }
       }
       return size;
-   }
-
-   public static class CacheConfigurationBuilder extends ConfigurationBuilder {
-      private String cacheName;
-
-      public CacheConfigurationBuilder(String cacheName) {
-         this.cacheName = cacheName;
-      }
    }
 }
