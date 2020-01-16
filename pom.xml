@@ -16,7 +16,10 @@
         <version.junit-jupiter>5.5.2</version.junit-jupiter>
         <version.infinispan>10.1.0.Final</version.infinispan>
         <version.log4j>2.8.1</version.log4j>
-        <version.jol>0.9</version.jol>
+        <version.testcontainers>1.12.3</version.testcontainers>
+        <version.HikariCP>3.4.2</version.HikariCP>
+        <version.mysql-connector>8.0.18</version.mysql-connector>
+        <version.zt-exec>1.11</version.zt-exec>
     </properties>
 
     <dependencies>
@@ -24,6 +27,11 @@
         <dependency>
             <groupId>org.infinispan</groupId>
             <artifactId>infinispan-core</artifactId>
+            <version>${version.infinispan}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.infinispan</groupId>
+            <artifactId>infinispan-cachestore-jdbc</artifactId>
             <version>${version.infinispan}</version>
         </dependency>
         <dependency>
@@ -55,6 +63,35 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>${version.log4j}</version>
+        </dependency>
+
+        <!-- containers -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${version.testcontainers}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mysql</artifactId>
+            <version>${version.testcontainers}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>${version.HikariCP}</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${version.mysql-connector}</version>
+        </dependency>
+
+        <!-- util -->
+        <dependency>
+            <groupId>org.zeroturnaround</groupId>
+            <artifactId>zt-exec</artifactId>
+            <version>${version.zt-exec}</version>
         </dependency>
     </dependencies>
 

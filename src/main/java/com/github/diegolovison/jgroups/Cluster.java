@@ -29,13 +29,11 @@ public abstract class Cluster<N extends Node> {
          ignored.removeAll(Arrays.asList(nodes));
          provider.createFailure(nodes, ignored);
       }
-      provider.waitForFailure();
    }
 
    public void solveFailure(Failure failure, Node... nodes) {
       FailureProvider provider = FailureProvider.get(failure);
       provider.solveFailure(nodes);
-      provider.waitForFailureBeSolved();
    }
 
    public void disconnectAll() {

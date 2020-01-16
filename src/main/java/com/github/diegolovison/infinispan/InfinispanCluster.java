@@ -3,6 +3,7 @@ package com.github.diegolovison.infinispan;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import com.github.diegolovison.jgroups.Cluster;
 import com.github.diegolovison.os.ChaosProcessFactory;
@@ -22,12 +23,17 @@ public class InfinispanCluster extends Cluster<InfinispanNode> {
 
    // GlobalConfigurationBuilder is not serializable. This is why we are using the config file
    public List<InfinispanNode> createNodes(String configFile, int numberOfNodes) {
+      return createNodes(configFile, numberOfNodes, null);
+   }
+
+   public List<InfinispanNode> createNodes(String configFile, int numberOfNodes, Map<String, String> arguments) {
       // maybe an argument ?
       boolean connect = true;
       // create managers
       for (int i = 0; i < numberOfNodes; i++) {
          InfinispanChaosProcess chaosProcess = (InfinispanChaosProcess)
-               ChaosProcessFactory.createInstance(ChaosProcessFramework.INFINISPAN, this.processType).run(new InfinispanChaosConfig(configFile));
+               ChaosProcessFactory.createInstance(ChaosProcessFramework.INFINISPAN, this.processType)
+                     .run(new InfinispanChaosConfig(configFile, arguments));
          this.chaosProcesses.add(chaosProcess);
          this.nodes.add(new InfinispanNode(chaosProcess));
       }

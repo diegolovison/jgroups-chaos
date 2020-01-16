@@ -11,6 +11,7 @@ public class JGroupsChaosProcessSameVM extends JGroupsChaosProcess {
 
    private JChannel channel;
    private JGroupsChaosConfig chaosConfig;
+   private long pid;
 
    @Override
    public ChaosProcess run(JGroupsChaosConfig chaosConfig) {
@@ -23,6 +24,7 @@ public class JGroupsChaosProcessSameVM extends JGroupsChaosProcess {
       } catch (Exception e) {
          throw new IllegalStateException(e);
       }
+      this.pid = ProcessHandle.current().pid();
       return this;
    }
 
@@ -64,6 +66,11 @@ public class JGroupsChaosProcessSameVM extends JGroupsChaosProcess {
    @Override
    public JChannel getJChannel() {
       return this.channel;
+   }
+
+   @Override
+   public long getPid() {
+      return pid;
    }
 
    private JChannel createJChannel(String jGroupsXmlConfig) {
