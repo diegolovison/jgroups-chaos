@@ -24,6 +24,7 @@ public class JGroupsChaosProcessSpawn extends JGroupsChaosProcess {
    private static final Boolean serverDebug = Boolean.getBoolean("jgroups-chaos.SocketServer.debug");
 
    private SocketClient client;
+   private long pid;
 
    @Override
    public ChaosProcess run(JGroupsChaosConfig chaosConfig) {
@@ -38,6 +39,7 @@ public class JGroupsChaosProcessSpawn extends JGroupsChaosProcess {
 
       this.client = new SocketClient();
       this.client.waitForTheServer(availableServerSocket);
+      this.pid = process.pid();
 
       return this;
    }
@@ -70,6 +72,11 @@ public class JGroupsChaosProcessSpawn extends JGroupsChaosProcess {
    public void insertProtocol(Class<? extends ProtocolAction> protocolActionClass, ProtocolStack.Position above,
                               Class<TP> tpClass, Address[] ignored) {
       ProcessSpawn.insertProtocol(this.client, protocolActionClass, above, tpClass, ignored);
+   }
+
+   @Override
+   public long getPid() {
+      return pid;
    }
 
    @Override

@@ -40,4 +40,16 @@ public class Node {
    public void disconnect() {
       this.chaosProcess.disconnect();
    }
+
+   public void pause() {
+      this.chaosProcess.pause();
+   }
+
+   public void resume() {
+      this.chaosProcess.resume();
+   }
+
+   public String getPidStatus() {
+      return this.chaosProcess.getPidStatus();
+   }
 }

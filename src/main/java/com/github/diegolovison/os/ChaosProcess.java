@@ -1,10 +1,14 @@
 package com.github.diegolovison.os;
 
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
 import org.jgroups.Address;
 import org.jgroups.JChannel;
 import org.jgroups.protocols.TP;
 import org.jgroups.stack.Protocol;
 import org.jgroups.stack.ProtocolStack;
+import org.zeroturnaround.exec.ProcessExecutor;
 
 import com.github.diegolovison.jgroups.protocol.ProtocolAction;
 
@@ -24,5 +28,39 @@ public abstract class ChaosProcess<T> {
    public void insertProtocol(Class<? extends ProtocolAction> protocolActionClass, ProtocolStack.Position above,
                               Class<TP> tpClass, Address[] ignored) {
       ProtocolAction.insert(getJChannel(), protocolActionClass, above, tpClass, ignored);
+   }
+
+   public abstract long getPid();
+
+   public void pause() {
+      if (ProcessHandle.current().pid() == getPid()) {
+         throw new IllegalStateException("You can't pause the same process");
+      }
+      try {
+         new ProcessExecutor().command("kill", "-STOP", String.valueOf(getPid())).readOutput(true).exitValues(0).execute().outputUTF8();
+      } catch (IOException | InterruptedException | TimeoutException e) {
+         throw new IllegalStateException(e);
+      }
+   }
+
+   public void resume() {
+      if (ProcessHandle.current().pid() == getPid()) {
+         throw new IllegalStateException("You can't resume the same process");
+      }
+      try {
+         new ProcessExecutor().command("kill", "-CONT", String.valueOf(getPid())).readOutput(true).exitValues(0).execute().outputUTF8();
+      } catch (IOException | InterruptedException | TimeoutException e) {
+         throw new IllegalStateException(e);
+      }
+   }
+
+   public String getPidStatus() {
+      String output;
+      try {
+         output = new ProcessExecutor().command("ps", "-o", "state=", "-p", String.valueOf(getPid())).readOutput(true).exitValues(0).execute().outputUTF8();
+      } catch (IOException | InterruptedException | TimeoutException e) {
+         throw new IllegalStateException(e);
+      }
+      return output.split(" ")[0].trim();
    }
 }

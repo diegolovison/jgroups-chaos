@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration name="CommandLineConfig" packages="org.infinispan.commons.logging.log4j">
+
+    <Appenders>
+        <Console name="STDOUT">
+            <PatternLayout pattern="%d{HH:mm:ss,SSS} %-5p (%t) [%c{1}] %m%throwable{10}%n"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="org.infinispan" level="INFO"/>
+        <Logger name="org.jgroups.JChannel" level="TRACE"/>
+        <Logger name="org.jgroups" level="INFO"/>
+
+        <Root level="TRACE">
+            <AppenderRef ref="STDOUT" level="TRACE"/>
+        </Root>
+    </Loggers>
+</Configuration>

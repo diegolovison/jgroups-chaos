@@ -5,6 +5,7 @@ import java.util.List;
 import org.jgroups.Address;
 
 import com.github.diegolovison.jgroups.Node;
+import com.github.diegolovison.jgroups.failure.provider.GCStopWorldFailureProvider;
 import com.github.diegolovison.jgroups.failure.provider.NetworkPartitionDiscardFailureProvider;
 
 public interface FailureProvider {
@@ -16,8 +17,10 @@ public interface FailureProvider {
    static FailureProvider get(Failure failure) {
       if (Failure.NetworkPartition.equals(failure)) {
          return new NetworkPartitionDiscardFailureProvider();
+      } else if (Failure.GCStopWorld.equals(failure)) {
+         return new GCStopWorldFailureProvider();
       }
-      throw new NullPointerException();
+      throw new NullPointerException(String.format("Can't find the failure provider: %s", failure));
    }
 
    default Address[] addressFrom(List<Node> nodes) {
@@ -28,7 +31,7 @@ public interface FailureProvider {
       return addresses;
    }
 
-   void waitForFailure();
+   void waitForFailure(Node node);
 
-   void waitForFailureBeSolved();
+   void waitForFailureBeSolved(Node node);
 }

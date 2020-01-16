@@ -15,4 +15,6 @@ public abstract class ChaosCache {
    public abstract boolean isConflictResolutionInProgress();
 
    public abstract boolean isStateTransferInProgress();
+
+   public abstract int size();
 }

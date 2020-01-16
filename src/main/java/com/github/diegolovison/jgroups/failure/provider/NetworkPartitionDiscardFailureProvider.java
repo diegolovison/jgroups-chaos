@@ -18,6 +18,7 @@ public class NetworkPartitionDiscardFailureProvider implements FailureProvider {
       for (Node node : nodes) {
          node.insertProtocol(DiscardAction.class, ProtocolStack.Position.ABOVE, TP.class, addressFrom(ignored));
       }
+      waitForFailure(null);
    }
 
    @Override
@@ -25,16 +26,17 @@ public class NetworkPartitionDiscardFailureProvider implements FailureProvider {
       for (Node node : nodes) {
          node.removeProtocol(DISCARD.class);
       }
+      waitForFailureBeSolved(null);
    }
 
    @Override
-   public void waitForFailure() {
+   public void waitForFailure(Node node) {
       // TODO Find out how to detect the failure
       sleep(60 * 1_000);
    }
 
    @Override
-   public void waitForFailureBeSolved() {
+   public void waitForFailureBeSolved(Node node) {
       // TODO Find out how to detect that the failure was solved
       sleep(60 * 1_000);
    }

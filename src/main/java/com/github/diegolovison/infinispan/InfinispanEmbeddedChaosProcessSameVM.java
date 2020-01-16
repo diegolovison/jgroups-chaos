@@ -1,6 +1,7 @@
 package com.github.diegolovison.infinispan;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.infinispan.Cache;
 import org.infinispan.conflict.ConflictManager;
@@ -18,11 +19,19 @@ import com.github.diegolovison.os.Eventually;
 public class InfinispanEmbeddedChaosProcessSameVM extends InfinispanChaosProcess {
 
    private EmbeddedCacheManager cacheManager;
+   private long pid;
 
    @Override
    public InfinispanEmbeddedChaosProcessSameVM run(InfinispanChaosConfig config) {
       try {
+         Map<String, String> arguments = config.getArguments();
+         if (arguments != null) {
+            for (String key : arguments.keySet()) {
+               System.setProperty(key, arguments.get(key));
+            }
+         }
          this.cacheManager = new DefaultCacheManager(config.getConfigFile());
+         this.pid = ProcessHandle.current().pid();
       } catch (IOException e) {
          throw new IllegalStateException(e);
       }
@@ -85,6 +94,11 @@ public class InfinispanEmbeddedChaosProcessSameVM extends InfinispanChaosProcess
                ConflictManager cm = ConflictManagerFactory.get(cache.getAdvancedCache());
                return cm.isStateTransferInProgress();
             }
+
+            @Override
+            public int size() {
+               return cache.size();
+            }
          };
       } else {
          throw new NullPointerException("Cache cannot be null");
@@ -111,5 +125,10 @@ public class InfinispanEmbeddedChaosProcessSameVM extends InfinispanChaosProcess
          channel = ((JGroupsTransport) this.cacheManager.getTransport()).getChannel();
       }
       return channel;
+   }
+
+   @Override
+   public long getPid() {
+      return pid;
    }
 }

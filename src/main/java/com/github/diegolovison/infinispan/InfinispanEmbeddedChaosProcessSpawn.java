@@ -26,6 +26,7 @@ public class InfinispanEmbeddedChaosProcessSpawn extends InfinispanChaosProcess 
    private static final Boolean serverDebug = Boolean.getBoolean("jgroups-chaos.SocketServer.debug");
 
    private SocketClient client;
+   private long pid;
 
    @Override
    public ChaosProcess run(InfinispanChaosConfig chaosConfig) {
@@ -41,6 +42,7 @@ public class InfinispanEmbeddedChaosProcessSpawn extends InfinispanChaosProcess 
 
       this.client = new SocketClient();
       this.client.waitForTheServer(availableServerSocket);
+      this.pid = process.pid();
 
       return this;
    }
@@ -73,6 +75,11 @@ public class InfinispanEmbeddedChaosProcessSpawn extends InfinispanChaosProcess 
    public void insertProtocol(Class<? extends ProtocolAction> protocolActionClass, ProtocolStack.Position above,
                               Class<TP> tpClass, Address[] ignored) {
       ProcessSpawn.insertProtocol(this.client, protocolActionClass, above, tpClass, ignored);
+   }
+
+   @Override
+   public long getPid() {
+      return pid;
    }
 
    @Override
@@ -121,6 +128,11 @@ public class InfinispanEmbeddedChaosProcessSpawn extends InfinispanChaosProcess 
             @Override
             public boolean isStateTransferInProgress() {
                return Boolean.valueOf(_this.client.sendMessage("getCacheIsStateTransferInProgress[" + cacheName + "]"));
+            }
+
+            @Override
+            public int size() {
+               return Integer.valueOf(_this.client.sendMessage("getCacheSize[" + cacheName + "]"));
             }
          };
       } else {
