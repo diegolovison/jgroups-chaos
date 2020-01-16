@@ -14,8 +14,8 @@ public class JGroupsChaosProcessSameVM extends JGroupsChaosProcess {
 
    @Override
    public ChaosProcess run(JGroupsChaosConfig chaosConfig) {
-      this.channel = createJChannel();
       this.chaosConfig = chaosConfig;
+      this.channel = createJChannel(this.chaosConfig.getjGroupsXmlConfig());
       try {
          if (chaosConfig.isStart()) {
             this.connect();
@@ -66,10 +66,15 @@ public class JGroupsChaosProcessSameVM extends JGroupsChaosProcess {
       return this.channel;
    }
 
-   private JChannel createJChannel() {
+   private JChannel createJChannel(String jGroupsXmlConfig) {
       JChannel jChannel;
       try {
-         jChannel = new JChannel();
+         if (jGroupsXmlConfig != null) {
+            jChannel = new JChannel(jGroupsXmlConfig);
+         } else {
+            jChannel = new JChannel();
+         }
+
       } catch (Exception e) {
          throw new IllegalStateException(e);
       }

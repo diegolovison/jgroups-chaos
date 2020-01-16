@@ -18,30 +18,33 @@ public class JGroupsClusterExtension implements AfterEachCallback {
 
    private final String clusterName;
    private final ChaosProcessType processType;
+   private final String jGroupsXmlConfig;
 
-   public JGroupsClusterExtension(String clusterName, ChaosProcessType processType) {
+   public JGroupsClusterExtension(String clusterName, ChaosProcessType processType, String jGroupsXmlConfig) {
       this.clusterName = clusterName;
       this.processType = processType;
+      this.jGroupsXmlConfig = jGroupsXmlConfig;
    }
 
    @Override
    public void afterEach(ExtensionContext extensionContext) throws Exception {
-      if (jGroupsCluster != null) {
-         jGroupsCluster.disconnectAll();
+      if (this.jGroupsCluster != null) {
+         this.jGroupsCluster.disconnectAll();
       }
    }
 
    public JGroupsCluster jGroupsCluster() {
-      if (jGroupsCluster == null) {
-         jGroupsCluster = new JGroupsCluster(clusterName, this.processType);
+      if (this.jGroupsCluster == null) {
+         this.jGroupsCluster = new JGroupsCluster(this.clusterName, this.processType, this.jGroupsXmlConfig);
       }
-      return jGroupsCluster;
+      return this.jGroupsCluster;
    }
 
    public static class JGroupsClusterExtensionBuilder {
 
       private ChaosProcessType processType;
       private String clusterName;
+      private String jGroupsXmlConfig;
 
       public JGroupsClusterExtensionBuilder() {
          this.clusterName = UUID.randomUUID().toString();
@@ -58,8 +61,13 @@ public class JGroupsClusterExtension implements AfterEachCallback {
          return this;
       }
 
+      public JGroupsClusterExtensionBuilder jGroupsXmlConfig(String jGroupsXmlConfig) {
+         this.jGroupsXmlConfig = jGroupsXmlConfig;
+         return this;
+      }
+
       public JGroupsClusterExtension build() {
-         JGroupsClusterExtension clusterExtension = new JGroupsClusterExtension(this.clusterName, this.processType);
+         JGroupsClusterExtension clusterExtension = new JGroupsClusterExtension(this.clusterName, this.processType, this.jGroupsXmlConfig);
          return clusterExtension;
       }
    }
