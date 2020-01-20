@@ -38,16 +38,16 @@ public class GCStopWorldFailureProvider implements FailureProvider {
    }
 
    @Override
-   public void waitForFailure(Node node) {
-      String status = node.getPidStatus();
+   public void waitForFailure(Node... nodes) {
+      String status = nodes[0].getPidStatus();
       if (!"T".equals(status)) {
          throw new IllegalStateException("The status must be 'S'. The SO call is sync");
       }
    }
 
    @Override
-   public void waitForFailureBeSolved(Node node) {
-      String status = node.getPidStatus();
+   public void waitForFailureBeSolved(Node... nodes) {
+      String status = nodes[0].getPidStatus();
       boolean running = "S".equals(status) || "R".equals(status);
       if (!running) {
          throw new IllegalStateException("The status must be 'S' or 'R'. The SO call is sync");

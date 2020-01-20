@@ -16,5 +16,8 @@
         <replicated-cache name="jdbcCache" mode="SYNC" configuration="default">
             <expiration lifespan="10000"/>
         </replicated-cache>
+        <replicated-cache name="partitionHandlingCache" mode="SYNC">
+            <partition-handling merge-policy="REMOVE_ALL"/>
+        </replicated-cache>
     </cache-container>
 </infinispan>

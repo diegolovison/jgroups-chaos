@@ -20,6 +20,7 @@
         <version.HikariCP>3.4.2</version.HikariCP>
         <version.mysql-connector>8.0.18</version.mysql-connector>
         <version.zt-exec>1.11</version.zt-exec>
+        <version.zt-zip>1.13</version.zt-zip>
     </properties>
 
     <dependencies>
@@ -27,6 +28,11 @@
         <dependency>
             <groupId>org.infinispan</groupId>
             <artifactId>infinispan-core</artifactId>
+            <version>${version.infinispan}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.infinispan</groupId>
+            <artifactId>infinispan-client-hotrod</artifactId>
             <version>${version.infinispan}</version>
         </dependency>
         <dependency>
@@ -92,6 +98,11 @@
             <groupId>org.zeroturnaround</groupId>
             <artifactId>zt-exec</artifactId>
             <version>${version.zt-exec}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zeroturnaround</groupId>
+            <artifactId>zt-zip</artifactId>
+            <version>1.13</version>
         </dependency>
     </dependencies>
 

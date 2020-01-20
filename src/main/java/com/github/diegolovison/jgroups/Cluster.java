@@ -42,5 +42,9 @@ public abstract class Cluster<N extends Node> {
       }
    }
 
+   public void disconnect(Node node) {
+      node.disconnect();
+   }
+
    public abstract int size();
 }

@@ -31,7 +31,7 @@ public interface FailureProvider {
       return addresses;
    }
 
-   void waitForFailure(Node node);
+   void waitForFailure(Node... node);
 
-   void waitForFailureBeSolved(Node node);
+   void waitForFailureBeSolved(Node... node);
 }

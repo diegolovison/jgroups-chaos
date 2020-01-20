@@ -1,0 +1,17 @@
+<infinispan>
+    <cache-container default-cache="default">
+        <transport/>
+        <distributed-cache name="cache" owners="2" segments="30" mode="ASYNC" remote-timeout="30000" start="EAGER">
+            <locking isolation="READ_COMMITTED" striping="false" acquire-timeout="30000" concurrency-level="1000"/>
+            <transaction mode="NONE"/>
+            <memory>
+                <object size="4000000"/>
+            </memory>
+            <expiration max-idle="20000" lifespan="300000"/>
+            <persistence passivation="true">
+                <file-store max-entries="1000000" relative-to="jboss.server.data.dir" path="cache" name="cache" shared="false" preload="false" fetch-state="true" purge="true"/>
+            </persistence>
+        </distributed-cache>
+    </cache-container>
+</infinispan>
+
