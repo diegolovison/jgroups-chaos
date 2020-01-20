@@ -52,4 +52,8 @@ public class Node {
    public String getPidStatus() {
       return this.chaosProcess.getPidStatus();
    }
+
+   public int getNumberOfMembers() {
+      return this.chaosProcess.getNumberOfMembers();
+   }
 }

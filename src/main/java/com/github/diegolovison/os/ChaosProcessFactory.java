@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.github.diegolovison.infinispan.InfinispanEmbeddedChaosProcessSameVM;
 import com.github.diegolovison.infinispan.InfinispanEmbeddedChaosProcessSpawn;
+import com.github.diegolovison.infinispan.InfinispanRemoteChaosProcessSameVM;
 import com.github.diegolovison.jgroups.JGroupsChaosProcessSameVM;
 import com.github.diegolovison.jgroups.JGroupsChaosProcessSpawn;
 
@@ -27,6 +28,8 @@ public class ChaosProcessFactory {
             return new InfinispanEmbeddedChaosProcessSameVM();
          } else if (ChaosProcessType.SPAWN.equals(processType)) {
             return new InfinispanEmbeddedChaosProcessSpawn();
+         } else if (ChaosProcessType.LOCAL_SERVER.equals(processType)) {
+            return new InfinispanRemoteChaosProcessSameVM();
          } else {
             throw new UnsupportedOperationException();
          }

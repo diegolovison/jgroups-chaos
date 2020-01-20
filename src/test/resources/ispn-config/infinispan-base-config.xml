@@ -4,7 +4,7 @@
         xmlns="urn:infinispan:config:10.1">
 
     <cache-container name="default" statistics="true">
-        <transport cluster="ISPN" stack="tcp"/>
+        <transport cluster="ISPN" stack="udp"/>
         <replicated-cache name="replicatedCache" mode="SYNC">
         </replicated-cache>
         <replicated-cache name="partitionHandlingCache" mode="SYNC">

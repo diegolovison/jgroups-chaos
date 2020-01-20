@@ -4,6 +4,7 @@ import static com.github.diegolovison.junit5.InfinispanClusterExtension.builder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
@@ -63,38 +64,33 @@ public class InfinispanPartitionHandlingTest {
       assertEquals(numberOfNodes, cluster.size());
 
       // And: conflict manager was done
-      waitTheConflictManager(10, cache1, cache2, cache3);
+      boolean runOnce = waitTheConflictManager(10, cache1, cache2, cache3);
 
       // And: the merge policy will remove all data
       assertNull(cache1.get("foo"));
       assertNull(cache2.get("foo"));
       assertNull(cache3.get("foo"));
+      assertTrue(runOnce);
    }
 
-   private void waitTheConflictManager(int times, ChaosCache... caches) {
+   private boolean waitTheConflictManager(int times, ChaosCache... caches) {
+      boolean runOnce = false;
       for (ChaosCache cache : caches) {
          int countConflictResolution = 0;
-         while (cache.isConflictResolutionInProgress()) {
+         while (cache.isConflictResolutionInProgress() || cache.isStateTransferInProgress()) {
+            if (!runOnce) {
+               runOnce = true;
+            }
             try {
                Thread.sleep(1000);
             } catch (InterruptedException e) {
                throw new IllegalStateException(e);
             }
             if (countConflictResolution++ >= times) {
-               throw new IllegalStateException("Do we need 10 seconds to solve conflict resolution?");
-            }
-         }
-         int countStateTransfer = 0;
-         while (cache.isStateTransferInProgress()) {
-            try {
-               Thread.sleep(1000);
-            } catch (InterruptedException e) {
-               throw new IllegalStateException(e);
-            }
-            if (countStateTransfer++ >= times) {
-               throw new IllegalStateException("Do we need 10 seconds to do the state transfer?");
+               throw new IllegalStateException(String.format("Do we need %d seconds to solve conflict resolution?", times));
             }
          }
       }
+      return runOnce;
    }
 }

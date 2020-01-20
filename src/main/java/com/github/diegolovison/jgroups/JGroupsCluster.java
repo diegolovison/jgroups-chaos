@@ -48,10 +48,6 @@ public class JGroupsCluster extends Cluster<Node> {
       }
    }
 
-   public void disconnect(Node node) {
-      node.disconnect();
-   }
-
    @Override
    public int size() {
       int size = 0;

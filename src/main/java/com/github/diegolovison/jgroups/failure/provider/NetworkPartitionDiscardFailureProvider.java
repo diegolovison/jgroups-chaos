@@ -1,7 +1,5 @@
 package com.github.diegolovison.jgroups.failure.provider;
 
-import static com.github.diegolovison.jgroups.Sleep.sleep;
-
 import java.util.List;
 
 import org.jgroups.protocols.DISCARD;
@@ -15,29 +13,51 @@ import com.github.diegolovison.jgroups.failure.action.DiscardAction;
 public class NetworkPartitionDiscardFailureProvider implements FailureProvider {
    @Override
    public void createFailure(Node[] nodes, List<Node> ignored) {
-      for (Node node : nodes) {
-         node.insertProtocol(DiscardAction.class, ProtocolStack.Position.ABOVE, TP.class, addressFrom(ignored));
+      if (nodes.length > 0) {
+         for (Node node : nodes) {
+            node.insertProtocol(DiscardAction.class, ProtocolStack.Position.ABOVE, TP.class, addressFrom(ignored));
+         }
+         waitForFailure(nodes);
       }
-      waitForFailure(null);
    }
 
    @Override
    public void solveFailure(Node... nodes) {
-      for (Node node : nodes) {
-         node.removeProtocol(DISCARD.class);
+      if (nodes.length > 0) {
+         for (Node node : nodes) {
+            node.removeProtocol(DISCARD.class);
+         }
+         waitForFailureBeSolved(nodes);
       }
-      waitForFailureBeSolved(null);
    }
 
    @Override
-   public void waitForFailure(Node node) {
-      // TODO Find out how to detect the failure
-      sleep(60 * 1_000);
+   public void waitForFailure(Node... nodes) {
+      waitFor(nodes);
    }
 
    @Override
-   public void waitForFailureBeSolved(Node node) {
-      // TODO Find out how to detect that the failure was solved
-      sleep(60 * 1_000);
+   public void waitForFailureBeSolved(Node... nodes) {
+      waitFor(nodes);
+   }
+
+   private void waitFor(Node... nodes) {
+      long begin = System.currentTimeMillis();
+      long maxMs = 60_000; // 1 minute
+      boolean done = false;
+      while (System.currentTimeMillis() - begin < maxMs) {
+         try {
+            Thread.sleep(1_000);
+         } catch (InterruptedException e) {
+            throw new IllegalStateException(e);
+         }
+         if (nodes.length == nodes[0].getNumberOfMembers()) {
+            done = true;
+            break;
+         }
+      }
+      if (!done) {
+         throw new IllegalStateException(String.format("Maybe more than %d seconds is required", maxMs / 1000));
+      }
    }
 }

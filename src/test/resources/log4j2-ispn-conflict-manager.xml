@@ -12,6 +12,7 @@
         <Logger name="org.infinispan" level="INFO"/>
         <Logger name="org.infinispan.conflict" level="TRACE"/>
         <Logger name="org.jgroups" level="INFO"/>
+        <Logger name="io.smallrye.metrics" level="INFO"/>
 
         <Root level="TRACE">
             <AppenderRef ref="STDOUT" level="TRACE"/>

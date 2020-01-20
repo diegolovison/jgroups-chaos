@@ -21,6 +21,14 @@ public class InfinispanCluster extends Cluster<InfinispanNode> {
       this.processType = processType;
    }
 
+   public List<InfinispanNode> createNodes(int numberOfNodes) {
+      return createNodes(null, numberOfNodes, null);
+   }
+
+   public InfinispanNode createNode(String configFile) {
+      return createNodes(configFile, 1, null).get(0);
+   }
+
    // GlobalConfigurationBuilder is not serializable. This is why we are using the config file
    public List<InfinispanNode> createNodes(String configFile, int numberOfNodes) {
       return createNodes(configFile, numberOfNodes, null);
@@ -33,11 +41,12 @@ public class InfinispanCluster extends Cluster<InfinispanNode> {
       for (int i = 0; i < numberOfNodes; i++) {
          InfinispanChaosProcess chaosProcess = (InfinispanChaosProcess)
                ChaosProcessFactory.createInstance(ChaosProcessFramework.INFINISPAN, this.processType)
-                     .run(new InfinispanChaosConfig(configFile, arguments));
+                     .run(new InfinispanChaosConfig(i, configFile, arguments));
          this.chaosProcesses.add(chaosProcess);
          this.nodes.add(new InfinispanNode(chaosProcess));
       }
 
+      // we should have 2 arguments, start and form a cluster..
       if (connect) {
          form(numberOfNodes);
       }
@@ -57,9 +66,9 @@ public class InfinispanCluster extends Cluster<InfinispanNode> {
    @Override
    public int size() {
       int size = 0;
-      for (InfinispanChaosProcess jGroupsChaosProcess : this.chaosProcesses) {
-         if (jGroupsChaosProcess.isRunning() && jGroupsChaosProcess.getClusterName().equals(this.clusterName)) {
-            size = jGroupsChaosProcess.getNumberOfMembers();
+      for (InfinispanChaosProcess chaosProcess : this.chaosProcesses) {
+         if (chaosProcess.isRunning() && chaosProcess.getClusterName().equals(this.clusterName)) {
+            size = chaosProcess.getNumberOfMembers();
             break;
          }
       }
