@@ -6,7 +6,14 @@
 
     <groupId>com.github.diegolovison</groupId>
     <artifactId>jgroups-chaos</artifactId>
+    <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+
+    <modules>
+        <module>jgroups-chaos-base</module>
+        <module>jgroups-chaos-jgroups</module>
+        <module>jgroups-chaos-infinispan</module>
+    </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -24,28 +31,6 @@
     </properties>
 
     <dependencies>
-        <!-- supported libraries -->
-        <dependency>
-            <groupId>org.infinispan</groupId>
-            <artifactId>infinispan-core</artifactId>
-            <version>${version.infinispan}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.infinispan</groupId>
-            <artifactId>infinispan-client-hotrod</artifactId>
-            <version>${version.infinispan}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.infinispan</groupId>
-            <artifactId>infinispan-cachestore-jdbc</artifactId>
-            <version>${version.infinispan}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jgroups</groupId>
-            <artifactId>jgroups</artifactId>
-            <version>${version.jgroups}</version>
-        </dependency>
-
         <!-- JUnit -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -57,52 +42,6 @@
             <artifactId>junit-jupiter-params</artifactId>
             <version>${version.junit-jupiter}</version>
             <scope>test</scope>
-        </dependency>
-
-        <!-- log -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>${version.log4j}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${version.log4j}</version>
-        </dependency>
-
-        <!-- containers -->
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers</artifactId>
-            <version>${version.testcontainers}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>mysql</artifactId>
-            <version>${version.testcontainers}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>${version.HikariCP}</version>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>${version.mysql-connector}</version>
-        </dependency>
-
-        <!-- util -->
-        <dependency>
-            <groupId>org.zeroturnaround</groupId>
-            <artifactId>zt-exec</artifactId>
-            <version>${version.zt-exec}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.zeroturnaround</groupId>
-            <artifactId>zt-zip</artifactId>
-            <version>1.13</version>
         </dependency>
     </dependencies>
 
