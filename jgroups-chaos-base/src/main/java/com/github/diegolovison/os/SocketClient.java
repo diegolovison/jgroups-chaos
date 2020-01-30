@@ -61,7 +61,7 @@ public class SocketClient extends Thread {
    public void waitForTheServer(Integer availablePort) {
       // is 10 enough ?
       Exception exception = null;
-      for (int i = 0; i < 10; i++) {
+      for (int i = 0; i < 60; i++) {
          try {
             this.startConnection(availablePort);
             exception = null;

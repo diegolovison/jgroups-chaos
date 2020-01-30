@@ -13,6 +13,7 @@ import org.jgroups.util.UUID;
 
 import com.github.diegolovison.base.ChaosConfig;
 import com.github.diegolovison.base.ProcessSpawn;
+import com.github.diegolovison.os.SpawnDebug;
 import com.github.diegolovison.protocol.ProtocolAction;
 import com.github.diegolovison.os.ChaosProcess;
 import com.github.diegolovison.os.ChaosProcessFactory;
@@ -21,20 +22,15 @@ import com.github.diegolovison.os.Spawn;
 
 public class JGroupsChaosProcessSpawn extends JGroupsChaosProcess {
 
-   private static final Integer serverPort = Integer.getInteger("jgroups-chaos.SocketServer.port", 6666);
-   private static final Boolean serverDebug = Boolean.getBoolean("jgroups-chaos.SocketServer.debug");
-
    private SocketClient client;
    private long pid;
 
    @Override
    public ChaosProcess run(JGroupsChaosConfig chaosConfig) {
-      int availableServerSocket = ChaosProcessFactory.getAvailableServerSocket(serverPort);
+      int availableServerSocket = ChaosProcessFactory.getAvailableServerSocket();
       String chaosConfigFile = ChaosConfig.ChaosConfigMarshaller.toStream(chaosConfig);
       List<String> jvmArgs = new ArrayList<>();
-      if (serverDebug) {
-         jvmArgs.add("-agentlib:jdwp=transport=dt_socket,address="+ (availableServerSocket + 1) +",server=y,suspend=n");
-      }
+      SpawnDebug.attacheDebuggerIfNeeded(jvmArgs);
 
       Process process = Spawn.exec(JGroupsChaosProcessSpawnServer.class, Arrays.asList(String.valueOf(availableServerSocket), chaosConfigFile), jvmArgs);
 

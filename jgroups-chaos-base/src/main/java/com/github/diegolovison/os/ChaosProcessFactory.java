@@ -1,6 +1,7 @@
 package com.github.diegolovison.os;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 
 public class ChaosProcessFactory {
 
@@ -40,29 +41,15 @@ public class ChaosProcessFactory {
       }
    }
 
-   public static int getAvailableServerSocket(int port) {
-      int availablePort = 0;
-      // is 100 enough ?
-      // i = i + 2 ( 1st socket server, 2nd maybe the debug port )
-      for (int i = 0; i < 100; i = i + 2) {
-         port = port + i;
-         SocketClient socketClient = new SocketClient();
-         try {
-            socketClient.startConnection(port);
-            socketClient.sendMessage("ping");
-         } catch (IllegalStateException | IOException e) {
-            // not running
-            if (availablePort == 0) {
-               availablePort = port;
-               break;
-            }
-         } finally {
-            socketClient.stopConnection();
+   public static int getAvailableServerSocket() {
+      try {
+         int availablePort;
+         try (ServerSocket s = new ServerSocket(0)) {
+            availablePort = s.getLocalPort();
          }
+         return availablePort;
+      } catch (IOException e) {
+         throw new IllegalStateException("Cannot find available port", e);
       }
-      if (availablePort == 0) {
-         throw new IllegalStateException("Maybe too many tests running?");
-      }
-      return availablePort;
    }
 }
