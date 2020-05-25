@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.github.diegolovison.base.Node;
 import com.github.diegolovison.base.Scheduler;
+import com.github.diegolovison.disable.RunOnlyWithInfinispan94;
 import com.github.diegolovison.infinispan.InfinispanCluster;
 import com.github.diegolovison.infinispan.InfinispanNode;
 import com.github.diegolovison.infinispan.cache.ChaosCache;
@@ -29,7 +30,7 @@ public class InfinispanRemoteClusterTest {
       final int numberOfNodes = 3;
       InfinispanCluster cluster = clusterExtension.infinispanCluster();
 
-      List<InfinispanNode> nodes = cluster.createNodes(numberOfNodes);
+      List<InfinispanNode> nodes = cluster.createNodes("ispn-config/infinispan-server-config.xml", numberOfNodes);
 
       // Then: the cluster will be ready
       assertEquals(numberOfNodes, nodes.size());
@@ -42,7 +43,7 @@ public class InfinispanRemoteClusterTest {
 
       // Given: two nodes
       final int numberOfNodes = 2;
-      List<InfinispanNode> nodes = cluster.createNodes(numberOfNodes);
+      List<InfinispanNode> nodes = cluster.createNodes("ispn-config/infinispan-server-config.xml", numberOfNodes);
       Node node1 = nodes.get(0);
       Node node2 = nodes.get(1);
 
@@ -59,6 +60,7 @@ public class InfinispanRemoteClusterTest {
       assertEquals(1, cluster.size());
    }
 
+   @RunOnlyWithInfinispan94
    @Test
    void testMaxIdleExpiration() {
 

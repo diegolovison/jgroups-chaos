@@ -3,6 +3,8 @@ package com.github.diegolovison;
 import static com.github.diegolovison.junit5.JGroupsClusterExtension.builder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -19,7 +21,8 @@ public class JGroupsChaosProcessSpawnTest {
    JGroupsClusterExtension clusterExtension = builder().processType(ChaosProcessType.SPAWN).build();
 
    @Test
-   void testSpawnServer() {
+   void testSpawnLibrary() {
+
       // Given: the cluster
       JGroupsCluster cluster = clusterExtension.jGroupsCluster();
 

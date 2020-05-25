@@ -2,6 +2,7 @@ package com.github.diegolovison.os;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,7 +16,7 @@ public class Spawn {
       return exec(clazz, args, Collections.EMPTY_LIST);
    }
 
-   public static Process exec(Class clazz, List<String> args, List<String> jvmArgs) {
+   public static Process exec(Class clazz, List<String> args, Collection<String> jvmArgs) {
       try {
          args = trim(args);
          jvmArgs = trim(jvmArgs);
@@ -39,12 +40,14 @@ public class Spawn {
    }
 
    // if one is empty, things goes wrong and are hard to find the root cause
-   private static List<String> trim(List<String> args) {
+   private static List<String> trim(Collection<String> args) {
       // Arrays.asList don't allow removing an item
       List<String> list = new ArrayList<>();
-      for (String str : args) {
-         if (str != null && !str.trim().isEmpty()) {
-            list.add(str);
+      if (args != null) {
+         for (String str : args) {
+            if (str != null && !str.trim().isEmpty()) {
+               list.add(str);
+            }
          }
       }
       return list;

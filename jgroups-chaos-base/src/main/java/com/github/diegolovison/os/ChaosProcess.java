@@ -1,6 +1,7 @@
 package com.github.diegolovison.os;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.concurrent.TimeoutException;
 
 import org.jgroups.Address;
@@ -13,6 +14,8 @@ import org.zeroturnaround.exec.ProcessExecutor;
 import com.github.diegolovison.protocol.ProtocolAction;
 
 public abstract class ChaosProcess<T> {
+
+   private Collection<String> jvmStartupArgs;
 
    // abstract
    public abstract ChaosProcess run(T supplier);
@@ -28,6 +31,14 @@ public abstract class ChaosProcess<T> {
    public void insertProtocol(Class<? extends ProtocolAction> protocolActionClass, ProtocolStack.Position above,
                               Class<TP> tpClass, Address[] ignored) {
       ProtocolAction.insert(getJChannel(), protocolActionClass, above, tpClass, ignored);
+   }
+
+   public Collection<String> getJvmStartupArgs() {
+      return jvmStartupArgs;
+   }
+
+   public void setJvmStartupArgs(Collection<String> jvmStartupArgs) {
+      this.jvmStartupArgs = jvmStartupArgs;
    }
 
    public abstract long getPid();

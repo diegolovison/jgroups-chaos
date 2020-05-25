@@ -1,8 +1,6 @@
 package com.github.diegolovison.jgroups;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import org.jgroups.Address;
 import org.jgroups.JChannel;
@@ -13,12 +11,11 @@ import org.jgroups.util.UUID;
 
 import com.github.diegolovison.base.ChaosConfig;
 import com.github.diegolovison.base.ProcessSpawn;
-import com.github.diegolovison.os.SpawnDebug;
-import com.github.diegolovison.protocol.ProtocolAction;
 import com.github.diegolovison.os.ChaosProcess;
 import com.github.diegolovison.os.ChaosProcessFactory;
 import com.github.diegolovison.os.SocketClient;
 import com.github.diegolovison.os.Spawn;
+import com.github.diegolovison.protocol.ProtocolAction;
 
 public class JGroupsChaosProcessSpawn extends JGroupsChaosProcess {
 
@@ -29,10 +26,8 @@ public class JGroupsChaosProcessSpawn extends JGroupsChaosProcess {
    public ChaosProcess run(JGroupsChaosConfig chaosConfig) {
       int availableServerSocket = ChaosProcessFactory.getAvailableServerSocket();
       String chaosConfigFile = ChaosConfig.ChaosConfigMarshaller.toStream(chaosConfig);
-      List<String> jvmArgs = new ArrayList<>();
-      SpawnDebug.attacheDebuggerIfNeeded(jvmArgs);
 
-      Process process = Spawn.exec(JGroupsChaosProcessSpawnServer.class, Arrays.asList(String.valueOf(availableServerSocket), chaosConfigFile), jvmArgs);
+      Process process = Spawn.exec(JGroupsChaosProcessSpawnServer.class, Arrays.asList(String.valueOf(availableServerSocket), chaosConfigFile), getJvmStartupArgs());
 
       this.client = new SocketClient();
       this.client.waitForTheServer(availableServerSocket);
