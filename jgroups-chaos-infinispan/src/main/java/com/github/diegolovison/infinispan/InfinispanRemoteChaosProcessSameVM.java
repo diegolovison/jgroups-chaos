@@ -1,7 +1,10 @@
 package com.github.diegolovison.infinispan;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,6 +20,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.infinispan.Version;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.Configuration;
@@ -92,6 +96,10 @@ public class InfinispanRemoteChaosProcessSameVM extends InfinispanChaosProcess {
          return getConnector();
       }, 30);
 
+      if (connector == null) {
+         throw new IllegalStateException("connector not found");
+      }
+
       try {
          connection = connector.getMBeanServerConnection();
       } catch (IOException e) {
@@ -116,10 +124,36 @@ public class InfinispanRemoteChaosProcessSameVM extends InfinispanChaosProcess {
    @Override
    public ChaosProcess run(InfinispanChaosConfig supplier) {
 
+      File tmpFolder = new File("/tmp/servers");
+      tmpFolder.mkdirs();
 
-      File serverHome = new File(System.getProperty("HotRodExtension.serverHome"));
-      File serverZipPath = new File(System.getProperty("HotRodExtension.serverZipPath"));
-      File dest = new File(serverHome, "server"+supplier.getOffset());
+      File serverZipPath;
+
+      String zipPath = System.getProperty("HotRodExtension.serverZipPath");
+      if (zipPath == null) {
+         String infinispanVersion = System.getProperty("version.infinispan");
+         String zipName = String.format("infinispan-server-%s.zip", infinispanVersion);
+
+         serverZipPath = new File(tmpFolder, zipName);
+
+         if (!serverZipPath.exists()) {
+            String downloadUrl = String.format("https://downloads.jboss.org/infinispan/%s/%s", infinispanVersion, zipName);
+            try (BufferedInputStream in = new BufferedInputStream(new URL(downloadUrl).openStream());
+                 FileOutputStream fileOutputStream = new FileOutputStream(serverZipPath)) {
+               byte dataBuffer[] = new byte[1024];
+               int bytesRead;
+               while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+                  fileOutputStream.write(dataBuffer, 0, bytesRead);
+               }
+            } catch (IOException e) {
+               throw new IllegalStateException("Cannot download the server", e);
+            }
+         }
+      } else {
+         serverZipPath = new File(zipPath);
+      }
+
+      File dest = new File(tmpFolder, "server-"+supplier.getOffset());
       if (!dest.getAbsolutePath().startsWith("/tmp")) {
          throw new IllegalStateException("We are using rm -fR so this prevent mistakes! :)");
       }
@@ -135,18 +169,21 @@ public class InfinispanRemoteChaosProcessSameVM extends InfinispanChaosProcess {
          infinispanServer.folder = dest.getAbsolutePath();
          infinispanServer.offset = supplier.getOffset();
 
-         String configFile = null;
-         if (supplier.getConfigFile() != null) {
+         String infinispanVersion = Version.getMajorMinor();
+         String configFile;
+         if (supplier.getConfigFile() != null && infinispanVersion.equalsIgnoreCase("9.4")) {
             File configDir = new File(dest.getAbsolutePath(), "standalone/configuration");
             String clusteredXml = new File(configDir.getAbsolutePath(), "clustered.xml").getAbsolutePath();
             File clusteredTransformedXml = new File(configDir.getAbsolutePath(), "clustered-transformed.xml");
             BasicXsl.xsl(clusteredXml, clusteredTransformedXml.getAbsolutePath(), supplier.getConfigFile());
             configFile = clusteredTransformedXml.getName();
+         } else {
+            configFile = supplier.getConfigFile();
          }
 
          StartedProcess startedProcess;
          try {
-            startedProcess = InfinispanServer.start(infinispanServer, configFile);
+            startedProcess = InfinispanServer.start(infinispanServer, configFile, getJvmStartupArgs());
          } catch (IOException e) {
             throw new IllegalStateException(e);
          }
@@ -244,26 +281,12 @@ public class InfinispanRemoteChaosProcessSameVM extends InfinispanChaosProcess {
    }
 
    public JMXConnector getConnector() {
-      String CONNECTOR_ADDRESS = "com.sun.management.jmxremote.localConnectorAddress";
-      String pid = String.valueOf(getPid());
       try {
-         VirtualMachine vm = VirtualMachine.attach(pid);
-         String connectorAddress = vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
-         if (connectorAddress == null) {
-            File agentFile = new File(vm.getSystemProperties().getProperty("java.home") + File.separator + "lib" + File.separator,"management-agent.jar");
-            // jdk8
-            if (agentFile.exists()) {
-               vm.loadAgent(agentFile.getAbsolutePath());
-            } else { // jdk9+
-               vm.startLocalManagementAgent();
-            }
-            connectorAddress = vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
-         }
-         if (connectorAddress == null) {
-            throw new IllegalStateException("Failed to retrieve connector address.");
-         }
-         return JMXConnectorFactory.connect(new JMXServiceURL(connectorAddress));
-      } catch (Exception e) {
+         JMXServiceURL url = new JMXServiceURL(String.format("service:jmx:rmi:///jndi/rmi://%s:%d/jmxrmi",
+               "127.0.0.1", (9999 + this.infinispanServer.offset)));
+         JMXConnector jmxConnector = JMXConnectorFactory.connect(url);
+         return jmxConnector;
+      } catch (IOException e) {
          throw new IllegalStateException(e);
       }
    }

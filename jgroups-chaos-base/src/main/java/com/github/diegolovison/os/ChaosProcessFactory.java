@@ -6,31 +6,31 @@ import java.net.ServerSocket;
 public class ChaosProcessFactory {
 
    public static ChaosProcess createInstance(ChaosProcessFramework framework, ChaosProcessType processType) {
+      ChaosProcess instance = null;
       String typeProperty = System.getProperty("jgroups-chaos.ChaosProcessType");
       if (typeProperty != null && !typeProperty.isBlank()) {
          processType = ChaosProcessType.valueOf(typeProperty);
       }
       if (ChaosProcessFramework.JGROUPS.equals(framework)) {
          if (ChaosProcessType.SAME_VM.equals(processType)) {
-            return instance("com.github.diegolovison.jgroups.JGroupsChaosProcessSameVM");
+            instance = instance("com.github.diegolovison.jgroups.JGroupsChaosProcessSameVM");
          } else if (ChaosProcessType.SPAWN.equals(processType)) {
-            return instance("com.github.diegolovison.jgroups.JGroupsChaosProcessSpawn");
-         } else {
-            throw new UnsupportedOperationException();
+            instance = instance("com.github.diegolovison.jgroups.JGroupsChaosProcessSpawn");
          }
       } else if (ChaosProcessFramework.INFINISPAN.equals(framework)) {
          if (ChaosProcessType.SAME_VM.equals(processType)) {
-            return instance("com.github.diegolovison.infinispan.InfinispanEmbeddedChaosProcessSameVM");
+            instance = instance("com.github.diegolovison.infinispan.InfinispanEmbeddedChaosProcessSameVM");
          } else if (ChaosProcessType.SPAWN.equals(processType)) {
-            return instance("com.github.diegolovison.infinispan.InfinispanEmbeddedChaosProcessSpawn");
+            instance = instance("com.github.diegolovison.infinispan.InfinispanEmbeddedChaosProcessSpawn");
          } else if (ChaosProcessType.LOCAL_SERVER.equals(processType)) {
-            return instance("com.github.diegolovison.infinispan.InfinispanRemoteChaosProcessSameVM");
-         } else {
-            throw new UnsupportedOperationException();
+            instance = instance("com.github.diegolovison.infinispan.InfinispanRemoteChaosProcessSameVM");
          }
-      } else {
+      }
+      if (instance == null) {
          throw new UnsupportedOperationException();
       }
+      instance.setJvmStartupArgs(JvmArgs.appendJvmArgs());
+      return instance;
    }
 
    private static ChaosProcess instance(String className) {

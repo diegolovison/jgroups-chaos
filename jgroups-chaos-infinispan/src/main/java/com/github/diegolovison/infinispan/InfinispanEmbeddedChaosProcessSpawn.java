@@ -1,8 +1,6 @@
 package com.github.diegolovison.infinispan;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import org.jgroups.Address;
 import org.jgroups.JChannel;
@@ -18,7 +16,6 @@ import com.github.diegolovison.os.ChaosProcess;
 import com.github.diegolovison.os.ChaosProcessFactory;
 import com.github.diegolovison.os.SocketClient;
 import com.github.diegolovison.os.Spawn;
-import com.github.diegolovison.os.SpawnDebug;
 import com.github.diegolovison.protocol.ProtocolAction;
 
 public class InfinispanEmbeddedChaosProcessSpawn extends InfinispanChaosProcess {
@@ -30,11 +27,8 @@ public class InfinispanEmbeddedChaosProcessSpawn extends InfinispanChaosProcess 
    public ChaosProcess run(InfinispanChaosConfig chaosConfig) {
       int availableServerSocket = ChaosProcessFactory.getAvailableServerSocket();
       String chaosConfigFile = ChaosConfig.ChaosConfigMarshaller.toStream(chaosConfig);
-      List<String> jvmOpts = new ArrayList<>();
-      SpawnDebug.attacheDebuggerIfNeeded(jvmOpts);
-      jvmOpts.add("-Djava.net.preferIPv4Stack=true"); // TODO really ?
 
-      Process process = Spawn.exec(InfinispanEmbeddedChaosProcessSpawnServer.class, Arrays.asList(String.valueOf(availableServerSocket), chaosConfigFile), jvmOpts);
+      Process process = Spawn.exec(InfinispanEmbeddedChaosProcessSpawnServer.class, Arrays.asList(String.valueOf(availableServerSocket), chaosConfigFile), getJvmStartupArgs());
 
       this.client = new SocketClient();
       this.client.waitForTheServer(availableServerSocket);

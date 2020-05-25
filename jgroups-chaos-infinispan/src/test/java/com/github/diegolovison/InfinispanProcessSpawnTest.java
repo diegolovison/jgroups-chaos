@@ -19,14 +19,14 @@ public class InfinispanProcessSpawnTest {
    InfinispanClusterExtension clusterExtension = builder().processType(ChaosProcessType.SPAWN).build();
 
    @Test
-   void testSpawnServer() {
+   void testSpawnLibrary() {
 
       // Given: the cluster
       InfinispanCluster cluster = clusterExtension.infinispanCluster();
 
       // When: the nodes are created
       final int numberOfNodes = 2;
-      List<InfinispanNode> nodes = cluster.createNodes("ispn-config/infinispan-base-config.xml", numberOfNodes);
+      List<InfinispanNode> nodes = cluster.createNodes("ispn-config/infinispan-library-config.xml", numberOfNodes);
 
       // Then: the cluster will be ready
       assertEquals(numberOfNodes, nodes.size());

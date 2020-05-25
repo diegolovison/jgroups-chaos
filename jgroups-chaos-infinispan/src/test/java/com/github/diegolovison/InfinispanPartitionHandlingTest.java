@@ -30,7 +30,7 @@ public class InfinispanPartitionHandlingTest {
       // Given: 3 nodes
       final String cacheName = "partitionHandlingCache";
       final int numberOfNodes = 3;
-      List<InfinispanNode> nodes = cluster.createNodes("ispn-config/infinispan-base-config.xml", numberOfNodes);
+      List<InfinispanNode> nodes = cluster.createNodes("ispn-config/infinispan-library-config.xml", numberOfNodes);
       InfinispanNode node1 = nodes.get(0);
       InfinispanNode node2 = nodes.get(1);
       InfinispanNode node3 = nodes.get(2);
