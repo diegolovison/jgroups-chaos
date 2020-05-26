@@ -20,42 +20,31 @@ public class InfinispanServer {
 
    public static StartedProcess start(InfinispanServerConfig infinispanServer, String configFile,
                                       Collection<String> jvmArgs) throws IOException {
-      String infinispanVersion = Version.getMajorMinor();
       List<String> args = new ArrayList<>();
-      if(infinispanVersion.equalsIgnoreCase("9.4")) {
-         args.add(infinispanServer.folder + "/bin/standalone.sh");
-         args.add("-Djboss.socket.binding.port-offset=" + infinispanServer.offset);
+
+      args.add(infinispanServer.folder + "/bin/server.sh");
+      args.add("-p");
+      args.add(String.valueOf(infinispanServer.getHotRodPort()));
+      if (configFile != null) {
+         File serverFolder = new File(infinispanServer.folder, "server");
+         File confFolder = new File(serverFolder, "conf");
+         File realConfiguration = new File(confFolder, "new-infinispan.xml");
+
+         Path copied = Paths.get(realConfiguration.getAbsolutePath());
+         Path originalPath;
+         try {
+            originalPath = Paths.get(InfinispanServer.class.getResource("/" + configFile).toURI());
+         } catch (URISyntaxException e) {
+            throw new IOException(e);
+         }
+         Files.copy(originalPath, copied, StandardCopyOption.REPLACE_EXISTING);
+
          args.add("-c");
-         if (configFile != null) {
-            args.add(configFile);
-         } else {
-            args.add("clustered.xml");
-         }
-      } else {
-         args.add(infinispanServer.folder + "/bin/server.sh");
-         args.add("-p");
-         args.add(String.valueOf(infinispanServer.getHotRodPort()));
-         if (configFile != null) {
-            File serverFolder = new File(infinispanServer.folder, "server");
-            File confFolder = new File(serverFolder, "conf");
-            File realConfiguration = new File(confFolder, "new-infinispan.xml");
-
-            Path copied = Paths.get(realConfiguration.getAbsolutePath());
-            Path originalPath;
-            try {
-               originalPath = Paths.get(InfinispanServer.class.getResource("/" + configFile).toURI());
-            } catch (URISyntaxException e) {
-               throw new IOException(e);
-            }
-            Files.copy(originalPath, copied, StandardCopyOption.REPLACE_EXISTING);
-
-            args.add("-c");
-            args.add(copied.getFileName().toString());
-         }
-         args.add("-Dcom.sun.management.jmxremote.port=" + (9999 + infinispanServer.offset));
-         args.add("-Dcom.sun.management.jmxremote.authenticate=false");
-         args.add("-Dcom.sun.management.jmxremote.ssl=false");
+         args.add(copied.getFileName().toString());
       }
+      args.add("-Dcom.sun.management.jmxremote.port=" + (9999 + infinispanServer.offset));
+      args.add("-Dcom.sun.management.jmxremote.authenticate=false");
+      args.add("-Dcom.sun.management.jmxremote.ssl=false");
       args.addAll(jvmArgs);
       // TODO allow debug remote server
       Iterator<String> it = args.iterator();

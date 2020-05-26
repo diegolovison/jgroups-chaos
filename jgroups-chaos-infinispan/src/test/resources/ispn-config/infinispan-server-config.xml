@@ -13,6 +13,8 @@
         <replicated-cache name="partitionHandlingCache" mode="SYNC">
             <partition-handling merge-policy="REMOVE_ALL"/>
         </replicated-cache>
+        <distributed-cache name="testMaxIdleExpiration" owners="2" segments="30" mode="ASYNC">
+        </distributed-cache>
     </cache-container>
 
     <server xmlns="urn:infinispan:server:10.1">

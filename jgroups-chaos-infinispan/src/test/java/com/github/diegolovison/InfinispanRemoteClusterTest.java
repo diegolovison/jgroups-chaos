@@ -11,7 +11,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.github.diegolovison.base.Node;
 import com.github.diegolovison.base.Scheduler;
-import com.github.diegolovison.disable.RunOnlyWithInfinispan94;
 import com.github.diegolovison.infinispan.InfinispanCluster;
 import com.github.diegolovison.infinispan.InfinispanNode;
 import com.github.diegolovison.infinispan.cache.ChaosCache;
@@ -60,13 +59,13 @@ public class InfinispanRemoteClusterTest {
       assertEquals(1, cluster.size());
    }
 
-   @RunOnlyWithInfinispan94
    @Test
    void testMaxIdleExpiration() {
 
+      int numberOfNodes = 3;
       InfinispanCluster cluster = clusterExtension.infinispanCluster();
 
-      List<InfinispanNode> nodes = cluster.createNodes("/ispn-config/infinispan-server-config-94.xml", 3);
+      List<InfinispanNode> nodes = cluster.createNodes("ispn-config/infinispan-server-config.xml", numberOfNodes);
       InfinispanNode node1 = nodes.get(0);
       InfinispanNode node2 = nodes.get(0);
       InfinispanNode node3 = nodes.get(0);
@@ -82,10 +81,13 @@ public class InfinispanRemoteClusterTest {
       }
 
       long begin = System.currentTimeMillis();
-
-      while (System.currentTimeMillis() - begin < 60_000) {
+      long now = System.currentTimeMillis();
+      while (now - begin < 60_000) {
          for (int i = 1; i <= 1000; i++) {
-            assertNotNull(cache.get(String.valueOf(i)));
+            String result = cache.get(String.valueOf(i));
+            String message = "Null after " + (System.currentTimeMillis() - begin) + "ms";
+            assertNotNull(result, message);
+            now = System.currentTimeMillis();
          }
       }
    }

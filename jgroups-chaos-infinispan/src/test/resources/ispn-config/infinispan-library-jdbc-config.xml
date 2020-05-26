@@ -1,0 +1,28 @@
+<infinispan
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:infinispan:config:10.1 https://infinispan.org/schemas/infinispan-config-10.1.xsd"
+        xmlns="urn:infinispan:config:10.1"
+        xmlns:jdbc="urn:infinispan:config:store:jdbc:10.1">
+
+    <cache-container name="default" statistics="true">
+        <transport cluster="ISPN" stack="udp"/>
+        <jmx enabled="true" />
+        <replicated-cache-configuration name="jdbc-replicated-config">
+            <persistence>
+                <jdbc:string-keyed-jdbc-store fetch-state="false" read-only="false" shared="true" key-to-string-mapper="org.infinispan.persistence.keymappers.DefaultTwoWayKey2StringMapper" dialect="MYSQL">
+                    <jdbc:connection-pool connection-url="${InfinispanPurgeJDBCDeadlockTest.testSimple.jdbcUrl}" username="test" password="test" driver="com.mysql.cj.jdbc.Driver"/>
+                    <jdbc:string-keyed-table drop-on-exit="false" create-on-start="true" prefix="ISPN_STRING_TABLE">
+                        <jdbc:id-column name="ID_COLUMN" type="VARCHAR(255)" />
+                        <jdbc:data-column name="DATA_COLUMN" type="VARBINARY(1000)" />
+                        <jdbc:timestamp-column name="TIMESTAMP_COLUMN" type="BIGINT" />
+                        <jdbc:segment-column name="SEGMENT_COLUMN" type="BIGINT"/>
+                    </jdbc:string-keyed-table>
+                </jdbc:string-keyed-jdbc-store>
+            </persistence>
+        </replicated-cache-configuration>
+        <replicated-cache name="jdbcCache" mode="SYNC" configuration="jdbc-replicated-config">
+            <expiration lifespan="10000"/>
+        </replicated-cache>
+    </cache-container>
+
+</infinispan>

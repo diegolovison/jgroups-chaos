@@ -124,6 +124,11 @@ public class InfinispanEmbeddedChaosProcessSpawn extends InfinispanChaosProcess 
             public int size() {
                return Integer.valueOf(_this.client.sendMessage("getCacheSize[" + cacheName + "]"));
             }
+
+            @Override
+            public void clear() {
+               _this.client.sendMessage("clearCache[" + cacheName + "]");
+            }
          };
       } else {
          throw new NullPointerException("Cache cannot be null");

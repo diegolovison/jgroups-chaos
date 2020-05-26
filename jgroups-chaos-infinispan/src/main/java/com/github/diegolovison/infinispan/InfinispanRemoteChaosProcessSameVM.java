@@ -78,6 +78,11 @@ public class InfinispanRemoteChaosProcessSameVM extends InfinispanChaosProcess {
             public int size() {
                return remoteCache.size();
             }
+
+            @Override
+            public void clear() {
+               remoteCache.clear();
+            }
          };
       }
       return chaosCache;
@@ -169,21 +174,9 @@ public class InfinispanRemoteChaosProcessSameVM extends InfinispanChaosProcess {
          infinispanServer.folder = dest.getAbsolutePath();
          infinispanServer.offset = supplier.getOffset();
 
-         String infinispanVersion = Version.getMajorMinor();
-         String configFile;
-         if (supplier.getConfigFile() != null && infinispanVersion.equalsIgnoreCase("9.4")) {
-            File configDir = new File(dest.getAbsolutePath(), "standalone/configuration");
-            String clusteredXml = new File(configDir.getAbsolutePath(), "clustered.xml").getAbsolutePath();
-            File clusteredTransformedXml = new File(configDir.getAbsolutePath(), "clustered-transformed.xml");
-            BasicXsl.xsl(clusteredXml, clusteredTransformedXml.getAbsolutePath(), supplier.getConfigFile());
-            configFile = clusteredTransformedXml.getName();
-         } else {
-            configFile = supplier.getConfigFile();
-         }
-
          StartedProcess startedProcess;
          try {
-            startedProcess = InfinispanServer.start(infinispanServer, configFile, getJvmStartupArgs());
+            startedProcess = InfinispanServer.start(infinispanServer, supplier.getConfigFile(), getJvmStartupArgs());
          } catch (IOException e) {
             throw new IllegalStateException(e);
          }

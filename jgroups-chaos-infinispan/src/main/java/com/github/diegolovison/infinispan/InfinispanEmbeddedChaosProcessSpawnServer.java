@@ -132,6 +132,15 @@ public class InfinispanEmbeddedChaosProcessSpawnServer extends SocketServer {
       }
    }
 
+   private String clearCache(String[] args) {
+      String cacheName = args[0];
+      ChaosCache cache = vm.getCache(cacheName);
+      if (cache != null) {
+         cache.clear();
+      }
+      return null;
+   }
+
    @Override
    protected void onStart(String[] args) {
       File configFile = new File(args[1]);
@@ -183,6 +192,8 @@ public class InfinispanEmbeddedChaosProcessSpawnServer extends SocketServer {
                   return new Response(getCacheIsStateTransferInProgress(args));
                } else if ("getCacheSize".equals(method)) {
                   return new Response(getCacheSize(args));
+               } else if ("clearCache".equals(method)) {
+                  return new Response(clearCache(args));
                }
             }
             return response;
