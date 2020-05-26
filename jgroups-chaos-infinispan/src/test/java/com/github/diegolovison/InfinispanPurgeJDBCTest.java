@@ -15,11 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.github.diegolovison.base.Node;
-import com.github.diegolovison.disable.RunOnlyWithInfinispan94;
+import com.github.diegolovison.base.failure.Failure;
 import com.github.diegolovison.infinispan.InfinispanCluster;
 import com.github.diegolovison.infinispan.InfinispanNode;
 import com.github.diegolovison.infinispan.cache.ChaosCache;
-import com.github.diegolovison.base.failure.Failure;
 import com.github.diegolovison.infinispan.junit5.InfinispanClusterExtension;
 import com.github.diegolovison.junit5.MySQLContainerExtension;
 import com.github.diegolovison.os.ChaosProcessType;
@@ -33,7 +32,6 @@ public class InfinispanPurgeJDBCTest {
    MySQLContainerExtension mySqlExtension = MySQLContainerExtension.builder().build();
 
    @Test
-   @RunOnlyWithInfinispan94
    public void testSimple() throws SQLException, InterruptedException {
 
       Map<String, String> arguments = new HashMap<>();
@@ -45,12 +43,19 @@ public class InfinispanPurgeJDBCTest {
       DataSource ds = mySqlExtension.getDataSource();
 
       // When: the data was added to the cache
-      List<InfinispanNode> nodes = cluster.createNodes("ispn-config/infinispan-base-config-94.xml", 2, arguments);
+      List<InfinispanNode> nodes = cluster.createNodes("ispn-config/infinispan-library-jdbc-config.xml", 2, arguments);
       InfinispanNode node1 = nodes.get(0);
       InfinispanNode node2 = nodes.get(1);
 
-      int cacheSize = 100;
+      // ISPN000562: Invalid cache loader configuration for 'JdbcStringBasedStoreConfiguration'.  If a cache loader is configured with purgeOnStartup, the cache loader cannot be shared in a cluster!
       ChaosCache cache1 = node1.getCache(cacheName);
+      ChaosCache cache2 = node2.getCache(cacheName);
+      node1.getCache(cacheName).clear();
+      assertEquals(0, cache1.size());
+      assertEquals(0, cache2.size());
+      // ----
+
+      int cacheSize = 100;
       for (int i = 0; i < cacheSize; i++) {
          cache1.put("foo" + i, "bar" + i);
       }
@@ -70,8 +75,8 @@ public class InfinispanPurgeJDBCTest {
 
       cluster.solveFailure(Failure.GCStopWorld, new Node[]{node1});
 
-      // TODO how can I identify that the purge was executed? 10 seconds is good?
-      Thread.sleep(10_000);
+      // it must be after the database reaper
+      Thread.sleep(70_000);
 
       assertEquals(0, cache1.size());
       performQuery(ds, "SELECT count(*) from ISPN_STRING_TABLE_" + cacheName, (rs) -> {

@@ -31,7 +31,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M4</version>
                 <configuration>
-                    <argLine>-Dlog4j.configurationFile=${log4j.configurationFile}</argLine>
+                    <argLine>-Dlog4j.configurationFile=${log4j.configurationFile} -Djava.net.preferIPv4Stack=true</argLine>
                 </configuration>
             </plugin>
         </plugins>

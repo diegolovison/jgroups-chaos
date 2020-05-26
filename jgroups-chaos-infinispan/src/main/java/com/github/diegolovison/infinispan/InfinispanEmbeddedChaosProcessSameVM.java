@@ -99,6 +99,11 @@ public class InfinispanEmbeddedChaosProcessSameVM extends InfinispanChaosProcess
             public int size() {
                return cache.size();
             }
+
+            @Override
+            public void clear() {
+               cache.clear();
+            }
          };
       } else {
          throw new NullPointerException("Cache cannot be null");
